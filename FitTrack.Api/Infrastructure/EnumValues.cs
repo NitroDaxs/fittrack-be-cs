@@ -8,7 +8,7 @@ public static class EnumValues
     public static string ToValue(this Enum value) =>
         JsonNamingPolicy.SnakeCaseLower.ConvertName(value.ToString());
 
-    public static string ToLablel(this Enum value) =>
+    public static string ToLabel(this Enum value) =>
         Regex.Replace(value.ToString(), "(?<!^)([A-Z])", " $1");
     
     public static TEnum Parse<TEnum>(string text) where TEnum : struct, Enum =>
@@ -22,14 +22,14 @@ public static class EnumValues
             && Enum.IsDefined(value);
     }
 
-    public static List<OptionsDto> Options<TEnum>() where TEnum : struct, Enum =>
+    public static List<OptionDto> Options<TEnum>() where TEnum : struct, Enum =>
         Enum.GetValues<TEnum>()
-            .Select(v => new OptionsDto(v.ToValue(), v.ToLablel(), v.ToValue()))
+            .Select(v => new OptionDto(v.ToValue(), v.ToLabel(), v.ToValue()))
             .ToList();
     
     private static string Normalize(string text) =>
-        text.Replace("_", "".Replace("-", "").Replace(" ", ""));
+        text.Replace("_", "").Replace("-", "").Replace(" ", "");
 }
 
-public record OptionsDto(string Id, string Name, string Slug);
+public record OptionDto(string Id, string Name, string Slug);
 

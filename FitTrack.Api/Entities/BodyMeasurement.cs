@@ -12,7 +12,7 @@ public class BodyMeasurement : Timestamped
     public decimal? Weight { get; set; }
     public decimal? BodyFatPct  {get; set;}
     public CustomMeasurements? CustomMeasurements { get; set; }
-    public string? Photo {get; set;}
+    public string? PhotoUrl {get; set;}
 }
 
 public class CustomMeasurements

@@ -1,6 +1,6 @@
 ﻿namespace FitTrack.Api.Entities;
 
-public class SavedItems
+public class SavedExercise
 {
     public int ExerciseId { get; set; }
     public Exercise Exercise { get; set; } = null!;

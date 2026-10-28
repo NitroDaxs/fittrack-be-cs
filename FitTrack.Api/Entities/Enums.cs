@@ -6,7 +6,7 @@ public enum Units { Imperial, Metric }
 
 public enum Difficulty { Beginner, Intermediate, Advanced }
 
-public enum ExerciseCategory { Strength, Cardio, Stretching, Plyometrics, Powerlifting, OlympicWeightLifting, Strongman }
+public enum ExerciseCategory { Strength, Cardio, Stretching, Plyometrics, Powerlifting, OlympicWeightlifting, Strongman }
 
 public enum RoutineGoal { Strength, Hypertrophy, FatLoss, Endurance, GeneralFitness }
 
