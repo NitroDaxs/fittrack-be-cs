@@ -6,8 +6,16 @@ builder.Services.AddDbContext<AppDbContext>(options => options
     
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<DbSeeder>();
 
 var app = builder.Build();
+
+if (args.Contains("--seed"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<DbSeeder>().SeedAsync();
+    return;
+}
 
 if (app.Environment.IsDevelopment())
 {
