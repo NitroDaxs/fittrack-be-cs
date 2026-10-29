@@ -22,14 +22,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         builder.Properties<UserRole>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<Units>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<Difficulty>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<ExerciseCategory>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<RoutineGoal>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<ArticleCategory>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<ArticleStatus>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<MuscleRole>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
-        builder.Properties<MediaType>().HaveConversion<SnakeCaseEnumConverter<UserRole>>();
+        builder.Properties<Units>().HaveConversion<SnakeCaseEnumConverter<Units>>();
+        builder.Properties<Difficulty>().HaveConversion<SnakeCaseEnumConverter<Difficulty>>();
+        builder.Properties<ExerciseCategory>().HaveConversion<SnakeCaseEnumConverter<ExerciseCategory>>();
+        builder.Properties<RoutineGoal>().HaveConversion<SnakeCaseEnumConverter<RoutineGoal>>();
+        builder.Properties<ArticleCategory>().HaveConversion<SnakeCaseEnumConverter<ArticleCategory>>();
+        builder.Properties<ArticleStatus>().HaveConversion<SnakeCaseEnumConverter<ArticleStatus>>();
+        builder.Properties<MuscleRole>().HaveConversion<SnakeCaseEnumConverter<MuscleRole>>();
+        builder.Properties<MediaType>().HaveConversion<SnakeCaseEnumConverter<MediaType>>();
 
         builder.Properties<decimal>().HavePrecision(8, 2);
     }
