@@ -14,7 +14,6 @@ public record UserDto(
 public record AuthResponse(
     UserDto User,
     string AccessToken,
-    string RefreshToken,
     string TokenType = "Bearer");
 
 public record RegisterRequest

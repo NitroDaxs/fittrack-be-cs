@@ -1,0 +1,41 @@
+﻿# Run a request with the green arrow next to it (Rider, Visual Studio)
+# or "Send Request" (VS Code with the REST Client extension).
+
+@api = http://localhost:8000/api
+@token = paste-the-access_token-from-login-here
+
+### Log in as the seeded member (use admin@test.com for the admin routes)
+POST {{api}}/login
+Content-Type: application/json
+
+{ "email": "member@test.com", "password": "password123" }
+
+### Who am I?
+GET {{api}}/me
+Authorization: Bearer {{token}}
+
+### Dashboard numbers
+GET {{api}}/me/dashboard
+Authorization: Bearer {{token}}
+
+### Log a workout
+POST {{api}}/me/workouts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Push Day",
+  "duration_minutes": 50,
+  "exercises": [
+    { "exercise_id": 1, "sets": [ { "weight": 185, "reps": 8 }, { "weight": 185, "reps": 7 } ] }
+  ]
+}
+
+### Validation error: Laravel-style 422
+POST {{api}}/register
+Content-Type: application/json
+
+{ "name": "", "email": "not-an-email", "password": "123" }
+
+### Public catalog, no token needed
+GET {{api}}/exercises?search=press&difficulty=beginner&perPage=4
