@@ -30,7 +30,7 @@ public class TokenService(IOptions<JwtOptions> options)
                 new Claim("sub", user.Id.ToString()),
                 new Claim("name", user.Name),
                 new Claim("email", user.Email),
-                new Claim("role", user.Role.ToString())
+                new Claim("role", user.Role.ToValue())
             ]),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),

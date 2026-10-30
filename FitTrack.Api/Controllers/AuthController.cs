@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FitTrack.Api.Controllers;
 
 [ApiController]
-[Route("(api)")]
+[Route("api")]
 public class AuthController(AppDbContext db, TokenService tokens) : ControllerBase
 {
     [HttpPost("register")]
@@ -24,6 +24,7 @@ public class AuthController(AppDbContext db, TokenService tokens) : ControllerBa
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
         };
         db.Users.Add(user);
+        await db.SaveChangesAsync();
         
         return StatusCode(StatusCodes.Status201Created, new AuthResponse(user.ToDto(), tokens.CreateToken(user)));
     }
