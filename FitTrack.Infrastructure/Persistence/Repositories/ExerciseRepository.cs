@@ -79,22 +79,20 @@ public class ExerciseRepository(AppDbContext db) : IExerciseRepository
             exercises = exercises.Where(e => e.ExerciseType == type);
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.MuscleGroup))
+        if (filter.MuscleGroups is { Count: > 0 } keys)
         {
-            var key = filter.MuscleGroup;
-            var slug = key.ToLowerInvariant();
-            var id = int.TryParse(key, out var parsed) ? parsed : 0;
+            var slugs = keys.Select(key => key.ToLowerInvariant()).ToList();
+            var ids = keys.Select(key => int.TryParse(key, out var parsed) ? parsed : 0).ToList();
             exercises = exercises.Where(e => e.MuscleGroups.Any(l =>
-                l.MuscleGroupId == id || l.MuscleGroup.Slug == slug || l.MuscleGroup.Name == key));
+                ids.Contains(l.MuscleGroupId) || slugs.Contains(l.MuscleGroup.Slug) || keys.Contains(l.MuscleGroup.Name)));
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.Equipment))
+        if (filter.Equipment is { Count: > 0 } equipmentKeys)
         {
-            var key = filter.Equipment;
-            var slug = key.ToLowerInvariant();
-            var id = int.TryParse(key, out var parsed) ? parsed : 0;
+            var slugs = equipmentKeys.Select(key => key.ToLowerInvariant()).ToList();
+            var ids = equipmentKeys.Select(key => int.TryParse(key, out var parsed) ? parsed : 0).ToList();
             exercises = exercises.Where(e => e.Equipment.Any(l =>
-                l.EquipmentId == id || l.Equipment.Slug == slug || l.Equipment.Name == key));
+                ids.Contains(l.EquipmentId) || slugs.Contains(l.Equipment.Slug) || equipmentKeys.Contains(l.Equipment.Name)));
         }
 
         return exercises;

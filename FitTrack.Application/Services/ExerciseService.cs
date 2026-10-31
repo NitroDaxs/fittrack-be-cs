@@ -8,7 +8,7 @@ public class ExerciseService(IExerciseRepository exercises)
             search.Search,
             EnumValues.TryParse<Difficulty>(search.Difficulty, out var difficulty) ? difficulty : null,
             EnumValues.TryParse<ExerciseCategory>(search.ExerciseType, out var type) ? type : null,
-            search.MuscleGroup,
+            search.MuscleGroups,
             search.Equipment);
 
         var page = await exercises.GetPublishedPageAsync(filter, paging, defaultPerPage: 8);

@@ -4,8 +4,8 @@ public record ExerciseFilter(
     string? Search,
     Difficulty? Difficulty = null,
     ExerciseCategory? ExerciseType = null,
-    string? MuscleGroup = null,
-    string? Equipment = null);
+    IReadOnlyList<string>? MuscleGroups = null,
+    IReadOnlyList<string>? Equipment = null);
 
 public interface IExerciseRepository
 {

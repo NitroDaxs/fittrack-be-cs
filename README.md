@@ -262,7 +262,7 @@ The numbers above are illustrative. These filters are available as well:
 
 | Route | Query parameters |
 | --- | --- |
-| `/exercises` | `search`, `difficulty`, `exercise_type`, `muscleGroup`, `equipment` |
+| `/exercises` | `search`, `difficulty`, `exercise_type`, `muscleGroup` and `equipment` (comma-separated to match any) |
 | `/routines` | `search`, `goals`, `levels`, `daysPerWeek` |
 | `/admin/*` lists | `search`, `sort`, `dir`, `category`, `status`, `role`, `goal`, `level`, `author` |
 

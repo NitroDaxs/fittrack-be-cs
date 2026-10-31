@@ -23,10 +23,21 @@ public class ExercisesQuery : PageQuery
 
     [FromQuery(Name = "exercise_type")] public string? ExerciseType { get; set; }
 
+    /// <summary>One muscle group, or several separated by commas to match any of them.</summary>
     public string? MuscleGroup { get; set; }
+
+    /// <summary>One piece of equipment, or several separated by commas to match any of them.</summary>
     public string? Equipment { get; set; }
 
-    public ExerciseSearch ToSearch() => new(Search, Difficulty, ExerciseType, MuscleGroup, Equipment);
+    public ExerciseSearch ToSearch() => new(
+        Search,
+        Difficulty,
+        ExerciseType,
+        SplitList(MuscleGroup),
+        SplitList(Equipment));
+
+    private static string[]? SplitList(string? value) =>
+        value?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }
 
 public class AdminListQuery : PageQuery

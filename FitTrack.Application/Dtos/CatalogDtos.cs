@@ -97,8 +97,8 @@ public record ExerciseSearch(
     string? Search = null,
     string? Difficulty = null,
     string? ExerciseType = null,
-    string? MuscleGroup = null,
-    string? Equipment = null);
+    IReadOnlyList<string>? MuscleGroups = null,
+    IReadOnlyList<string>? Equipment = null);
 
 public record RoutineSearch(
     string? Search,
