@@ -40,14 +40,13 @@ public record LoginRequest
     [Required, EmailAddress] public string Email { get; init; } = "";
     [Required] public string Password { get; init; } = "";
 }
-    
+
 public record UpdateProfileRequest
 {
     [MaxLength(255)] public string? Name { get; init; }
-    [EmailAddress] public string? Email { get; init; } 
+    [EmailAddress] public string? Email { get; init; }
     public Units? Units { get; init; }
     public string? CurrentPassword { get; init; }
     [MinLength(8)] public string? NewPassword { get; init; }
-    [Compare(nameof(NewPassword))] public string? NewPasswordConfirmation  { get; init; }
+    [Compare(nameof(NewPassword))] public string? NewPasswordConfirmation { get; init; }
 }
-    

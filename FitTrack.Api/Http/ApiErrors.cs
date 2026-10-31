@@ -30,7 +30,7 @@ public static class ApiErrors
             message = errors.Values.FirstOrDefault()?.FirstOrDefault() ?? "The given data was invalid.",
             errors,
         });
-    
+
     private static string Describe(string key, ModelError error)
     {
         if (!key.StartsWith('$'))

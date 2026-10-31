@@ -8,11 +8,11 @@ public class Exercise : Timestamped
     public string? Description { get; set; }
     public string? Instructions { get; set; }
     public Difficulty Difficulty { get; set; }
-    public ExerciseCategory ExerciseType {get; set;}
+    public ExerciseCategory ExerciseType { get; set; }
     public string? VideoUrl { get; set; }
     public string? ThumbnailUrl { get; set; }
     public bool IsPublished { get; set; } = true;
-    
+
     public int CreatedBy { get; set; }
     public User Creator { get; set; } = null!;
 

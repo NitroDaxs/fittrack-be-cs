@@ -5,12 +5,12 @@ public class BodyMeasurement : Timestamped
     public int Id { get; set; }
     public int UserId { get; set; }
     public User User { get; set; } = null!;
-    
+
     public DateOnly Date { get; set; }
     public decimal? Weight { get; set; }
-    public decimal? BodyFatPct  {get; set;}
+    public decimal? BodyFatPct { get; set; }
     public CustomMeasurements? CustomMeasurements { get; set; }
-    public string? PhotoUrl {get; set;}
+    public string? PhotoUrl { get; set; }
 }
 
 public class CustomMeasurements

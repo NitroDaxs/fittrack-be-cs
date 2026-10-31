@@ -33,7 +33,7 @@ public class StreakTests
     public void Current_streak_over_two_days()
     {
         DateOnly[] days = [Today, Today.AddDays(-1)];
-        
+
         Assert.Equal(2, DashboardService.CurrentStreak(days, Today));
     }
 

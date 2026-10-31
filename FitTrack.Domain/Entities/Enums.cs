@@ -10,10 +10,10 @@ public enum ExerciseCategory { Strength, Cardio, Stretching, Plyometrics, Powerl
 
 public enum RoutineGoal { Strength, Hypertrophy, FatLoss, Endurance, GeneralFitness }
 
-public enum ArticleCategory { Nutrition, TrainingTheory, Recovery, Mindset}
+public enum ArticleCategory { Nutrition, TrainingTheory, Recovery, Mindset }
 
 public enum ArticleStatus { Draft, Published }
 
-public enum MuscleRole {Primary, Secondary}
+public enum MuscleRole { Primary, Secondary }
 
-public enum MediaType {Image, Video}
+public enum MediaType { Image, Video }

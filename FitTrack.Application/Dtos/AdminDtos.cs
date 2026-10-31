@@ -25,7 +25,7 @@ public record RoutineRequest
     public string? Description { get; init; }
     public RoutineGoal? Goal { get; init; }
     public Difficulty? Level { get; init; }
-    [Range(1,7)] public int? DaysPerWeek { get; init; }
+    [Range(1, 7)] public int? DaysPerWeek { get; init; }
     public bool? IsPublic { get; init; }
     public List<RoutineDayRequest>? Days { get; init; }
 }

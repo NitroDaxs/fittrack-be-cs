@@ -11,7 +11,7 @@ public static partial class Slug
         slug = Separators().Replace(slug, "-");
         return slug.Trim('-');
     }
-    
+
     [GeneratedRegex(@"[^a-z0-9\s-]")]
     private static partial Regex Invalid();
 

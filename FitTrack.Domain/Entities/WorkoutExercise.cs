@@ -7,7 +7,7 @@ public class WorkoutExercise : Timestamped
     public Workout Workout { get; set; } = null!;
     public int ExerciseId { get; set; }
     public Exercise Exercise { get; set; } = null!;
-    
+
     public int Order { get; set; }
     public int? TargetSets { get; set; }
     public string? TargetReps { get; set; }

@@ -44,14 +44,24 @@ public static class Mappings
 
     public static CustomMeasurementsDto ToDto(this CustomMeasurements c) => new()
     {
-        Waist = c.Waist, Chest = c.Chest, Arms = c.Arms, Shoulders = c.Shoulders,
-        Hips = c.Hips, Thighs = c.Thighs, Calves = c.Calves,
+        Waist = c.Waist,
+        Chest = c.Chest,
+        Arms = c.Arms,
+        Shoulders = c.Shoulders,
+        Hips = c.Hips,
+        Thighs = c.Thighs,
+        Calves = c.Calves,
     };
 
     public static CustomMeasurements ToEntity(this CustomMeasurementsDto c) => new()
     {
-        Waist = c.Waist, Chest = c.Chest, Arms = c.Arms, Shoulders = c.Shoulders,
-        Hips = c.Hips, Thighs = c.Thighs, Calves = c.Calves,
+        Waist = c.Waist,
+        Chest = c.Chest,
+        Arms = c.Arms,
+        Shoulders = c.Shoulders,
+        Hips = c.Hips,
+        Thighs = c.Thighs,
+        Calves = c.Calves,
     };
 
     public static ArticleDto ToDto(this Article a)
@@ -80,7 +90,7 @@ public static class Mappings
         }
         catch (JsonException)
         {
-            
+
         }
 
         return JsonSerializer.SerializeToElement(new[] { new { type = "p", text = body } });

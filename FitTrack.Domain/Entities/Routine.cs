@@ -12,7 +12,7 @@ public class Routine : Timestamped
     public bool IsPublic { get; set; }
     public bool IsPublished { get; set; } = true;
 
-    public int CreatedBy {get; set; }
+    public int CreatedBy { get; set; }
     public User Creator { get; set; } = null!;
 
     public List<Workout> Workouts { get; set; } = [];

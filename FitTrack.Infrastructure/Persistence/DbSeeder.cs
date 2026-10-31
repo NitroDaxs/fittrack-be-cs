@@ -27,7 +27,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
             logger.LogWarning("The database already has users, so nothing was seeded. Reset it with: dotnet ef database drop");
             return;
         }
-        
+
         var folder = Path.Combine(env.ContentRootPath, "..", "seed-data");
 
         var admin = new User
@@ -49,7 +49,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
         var routines = SeedRoutines(Read<RoutineSeed>(folder, "routines.json"), admin, exercises);
         SeedArticles(Read<ArticleSeed>(folder, "articles.json"), admin);
         SeedMemberHistory(member, exercises, routines);
-        
+
         await db.SaveChangesAsync();
         logger.LogInformation("Seeded {Exercises} exercises, {Routines} routines and 2 users.", exercises.Count, routines.Count);
     }

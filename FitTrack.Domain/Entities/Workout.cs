@@ -8,10 +8,10 @@ public class Workout : Timestamped
     public string Name { get; set; } = "";
     public int? DayOrder { get; set; }
     public bool IsTemplate { get; set; } = true;
-    
+
     public int CreatedBy { get; set; }
     public User Creator { get; set; } = null!;
-    
+
     public List<WorkoutExercise> WorkoutExercises { get; set; } = [];
 }
 
