@@ -4,13 +4,15 @@ namespace FitTrack.Application.Services;
 
 public class AvatarService(IUserRepository users, IUnitOfWork unitOfWork, IAvatarStorage storage)
 {
+    // Well under the 4.5 MB request limit on Vercel, which rejects larger bodies itself.
     public const int MaxBytes = 2 * 1024 * 1024;
+    public const string TooLargeMessage = "The image must be 2 MB or smaller.";
 
     public async Task<UserDto> ReplaceAsync(int userId, Stream content, long length)
     {
         if (length > MaxBytes)
         {
-            throw new ValidationFailedException("file", "The image must be 2 MB or smaller.");
+            throw new ValidationFailedException("file", TooLargeMessage);
         }
 
         using var buffer = new MemoryStream();

@@ -92,6 +92,12 @@ if (args.Contains("--seed"))
     return;
 }
 
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<DatabaseInitializer>().RunAsync();
+}
+
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())

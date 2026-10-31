@@ -1,0 +1,16 @@
+**/bin/
+**/obj/
+**/.idea/
+**/.vs/
+**/uploads/
+.git/
+.gitignore
+FitTrack.Tests/
+
+# Never needed in the image, and the second holds development-only settings.
+**/Properties/launchSettings.json
+**/appsettings.Development.json
+**/.env*
+**/*.md
+Dockerfile
+.dockerignore

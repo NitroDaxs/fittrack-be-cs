@@ -22,7 +22,8 @@ public class ProfileController(ProfileService profile, AvatarService avatars) : 
         profile.ChangePasswordAsync(User.GetUserId(), request);
 
     [EnableRateLimiting(RateLimits.Uploads)]
-    [RequestSizeLimit(AvatarService.MaxBytes + 64 * 1024)]
+    [RequestSizeLimit(RejectOversizedAvatarAttribute.MaxRequestBytes)]
+    [RejectOversizedAvatar]
     [HttpPost("avatar")]
     public async Task<UserDto> UploadAvatar(IFormFile file)
     {

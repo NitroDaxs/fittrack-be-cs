@@ -6,6 +6,8 @@ namespace FitTrack.Infrastructure.Persistence;
 
 public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> logger)
 {
+    private const long SeedLockId = 7_348_201_965;
+
     private static readonly JsonSerializerOptions Json = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -22,6 +24,11 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
 
     public async Task SeedAsync()
     {
+        // Instances starting together wait here, and the rest then find the users the
+        // first one added. Postgres releases the lock when the transaction ends.
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        await db.Database.ExecuteSqlAsync($"SELECT pg_advisory_xact_lock({SeedLockId})");
+
         if (await db.Users.AnyAsync())
         {
             logger.LogWarning("The database already has users, so nothing was seeded. Reset it with: dotnet ef database drop");
@@ -51,6 +58,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
         SeedMemberHistory(member, exercises, routines);
 
         await db.SaveChangesAsync();
+        await transaction.CommitAsync();
         logger.LogInformation("Seeded {Exercises} exercises, {Routines} routines and 2 users.", exercises.Count, routines.Count);
     }
 

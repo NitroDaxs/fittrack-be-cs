@@ -13,8 +13,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Resolved here, not in the lambda, so a missing database stops the app at startup.
+        var connectionString = DatabaseConnection.Resolve(configuration);
+
         services.AddDbContext<AppDbContext>(options => options
-            .UseNpgsql(configuration.GetConnectionString("Default"))
+            .UseNpgsql(connectionString)
             .UseSnakeCaseNamingConvention());
 
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<AppDbContext>());
@@ -30,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IDashboardQueries, DashboardQueries>();
         services.AddScoped<IAdminStatsQueries, AdminStatsQueries>();
         services.AddScoped<DbSeeder>();
+        services.AddScoped<DatabaseInitializer>();
 
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
         services.AddScoped<ITokenService, TokenService>();

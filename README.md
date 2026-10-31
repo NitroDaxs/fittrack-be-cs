@@ -93,7 +93,8 @@ for example `Jwt__Key`.
 
 | Setting | Purpose | Default |
 | --- | --- | --- |
-| `ConnectionStrings:Default` | PostgreSQL connection | Local `fittrack` database |
+| `ConnectionStrings:Default` | PostgreSQL connection. If empty, the API uses `DATABASE_URL_UNPOOLED`, then `DATABASE_URL` | Local `fittrack` database in Development; none otherwise, and the app won't start without one |
+| `Database:MigrateOnStartup` | Apply migrations at startup, and seed if there are no users | `false` |
 | `Jwt:Key` | Token signing key, at least 32 characters | Development value only; the app won't start without one |
 | `Jwt:Issuer` | Token issuer | `fittrack-api` |
 | `Jwt:Audience` | Token audience | `fittrack-web` |
@@ -101,7 +102,7 @@ for example `Jwt__Key`.
 | `Email:ResendApiKey` | Resend API key | Empty, so no emails are sent |
 | `Email:From` | Sender of account emails | `FitTrack <onboarding@resend.dev>` |
 | `Email:FrontendUrl` | Base URL for links in emails | `http://localhost:5173` |
-| `Storage:UploadsPath` | Folder for uploaded pictures, relative to the API project | `uploads` |
+| `Storage:UploadsPath` | Folder for uploaded pictures, relative to the API project | `uploads`; `/tmp/uploads` in Production |
 | `Cors:AllowedOrigins` | Browser origins allowed to call the API | `http://localhost:5173` |
 
 ### Secrets
@@ -369,8 +370,8 @@ storage only needs a new implementation of it.
 
 ## Database
 
-Migrations live in `FitTrack.Infrastructure/Persistence/Migrations`, and the API
-doesn't apply them on startup.
+Migrations live in `FitTrack.Infrastructure/Persistence/Migrations`. The API only
+applies them on startup when `Database:MigrateOnStartup` is `true`.
 
 ```bash
 # Add a migration
@@ -418,11 +419,65 @@ tests.
 The docs pages at `/scalar/v1` and `/openapi/v1.json` are only available in
 Development.
 
+## Deploy to Vercel
+
+The API runs on Vercel's Container Runtime (beta, available on Hobby) from the
+`Dockerfile` at the repo root, with a Neon database from the Vercel Marketplace.
+
+1. Import the repository into a new Vercel project. Vercel detects the `Dockerfile` and
+   selects the Container preset, so no `vercel.json` is needed.
+2. Add the Neon integration from the Marketplace and connect it to the project. Leave
+   its custom prefix empty, because the API reads the unprefixed variable names.
+3. Set the environment variables below, then deploy.
+4. **Change the seeded passwords straight away.** On an empty database the first start
+   seeds `admin@test.com` (an admin) and `member@test.com`, both with the password
+   `password123`, which is public in this repository.
+
+| Variable | Value |
+| --- | --- |
+| `Database__MigrateOnStartup` | `true` |
+| `Jwt__Key` | 64 or more random characters, for example from `openssl rand -base64 48` |
+| `Cors__AllowedOrigins__0` | The React site's URL, such as `https://fittrack.example.com`, with no trailing slash |
+| `Email__FrontendUrl` | The React site's URL |
+| `Email__ResendApiKey` | Optional. Without it, no emails are sent |
+
+The Neon integration supplies `DATABASE_URL_UNPOOLED` and `DATABASE_URL`, so don't set
+`ConnectionStrings__Default`. The API prefers the unpooled URL because migrations don't
+work through Neon's PgBouncer pooler.
+
+Vercel routes to port 80 unless you set `PORT`, and the container listens on `PORT`,
+defaulting to 80. The image also turns on `ASPNETCORE_FORWARDEDHEADERS_ENABLED`, so rate
+limits use the client IP from `X-Forwarded-For`. Vercel
+[overwrites that header](https://vercel.com/docs/headers/request-headers#x-forwarded-for),
+so clients can't spoof it there. Anywhere else, only run this image behind a proxy that
+does the same.
+
+What to expect on Vercel:
+
+- Uploaded pictures are stored in `/tmp/uploads`, so they belong to one instance and are
+  lost when it scales down. Profiles then show a broken image link until a new picture
+  is uploaded.
+- Vercel rejects request bodies over 4.5 MB with its own 413 error. The API's 2 MB
+  avatar limit sits well below that.
+- Rate limits are counted per instance, so several instances allow proportionally more
+  attempts.
+- Each instance opens direct database connections, because it uses the unpooled URL.
+
+To try the image locally against a database that is reachable from the container:
+
+```bash
+docker build -t fittrack-api .
+docker run --rm -p 8080:8080 -e PORT=8080 -e Database__MigrateOnStartup=true \
+  -e Jwt__Key="$(openssl rand -base64 48)" \
+  -e ConnectionStrings__Default="Host=host.docker.internal;Port=5432;Database=<empty-db>;Username=postgres;Password=fittrack" \
+  fittrack-api
+```
+
 ## Known limitations
 
 - Logging out doesn't revoke the token on the server.
-- Rate limits use the connecting IP address, so behind a reverse proxy the app needs
-  forwarded headers set up, or all visitors share one limit.
+- Outside the Docker image, rate limits use the connecting IP address, so behind a
+  reverse proxy all visitors share one limit unless forwarded headers are set up.
 - Uploaded pictures keep their original metadata, which can include the location a
   photo was taken.
 - Progress-photo upload and social sign-in aren't implemented.

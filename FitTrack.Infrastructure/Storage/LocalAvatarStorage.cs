@@ -26,6 +26,13 @@ public class LocalAvatarStorage(IOptions<StorageOptions> options, IHostEnvironme
     public void Delete(string fileName)
     {
         // The name comes from our database, but never let it point outside the folder.
-        File.Delete(Path.Combine(Folder, Path.GetFileName(fileName)));
+        var path = Path.Combine(Folder, Path.GetFileName(fileName));
+
+        // On temporary disks the file, and even the folder, may be gone already, and
+        // File.Delete throws when the folder is missing.
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
     }
 }
