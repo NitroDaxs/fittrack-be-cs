@@ -1,4 +1,5 @@
-﻿using FitTrack.Api.Services;
+﻿using FitTrack.Application.Common;
+using FitTrack.Application.Services;
 
 namespace FitTrack.Tests;
 
@@ -42,6 +43,6 @@ public class StreakTests
     [InlineData("EZ-Bar", "ez-bar")]
     public void Slugs_match_laravel(string input, string expected)
     {
-        Assert.Equal(expected, FitTrack.Api.Infrastructure.Slug.From(input));
+        Assert.Equal(expected, Slug.From(input));
     }
 }

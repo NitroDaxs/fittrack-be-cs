@@ -1,21 +1,26 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using FitTrack.Api.Services;
+using FitTrack.Application;
+using FitTrack.Infrastructure;
+using FitTrack.Infrastructure.Persistence;
+using FitTrack.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options => options
-    .UseNpgsql(builder.Configuration.GetConnectionString("Default"))
-    .UseSnakeCaseNamingConvention());
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services
     .AddControllers(options =>
+    {
+        options.Filters.Add<ApplicationExceptionFilter>();
         options.ModelMetadataDetailsProviders.Add(
-            new BodyValidationNames(JsonNamingPolicy.SnakeCaseLower)))
+            new BodyValidationNames(JsonNamingPolicy.SnakeCaseLower));
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
@@ -33,7 +38,6 @@ if (jwt.Key.Length < 32)
         "Jwt:Key must be at least 32 characters. Set it in appsettings.Development.json or the Jwt__Key environment variable.");
 }
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -53,10 +57,6 @@ builder.Services.AddAuthentication();
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
-
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<DashboardService>();
-builder.Services.AddScoped<DbSeeder>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();

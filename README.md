@@ -6,6 +6,29 @@ React app (`../../fittrack`) works against it unchanged.
 
 Step-by-step guide: https://claude.ai/artifact/YWbTMsSDTSBBHxnRBxboCn
 
+## Architecture
+
+The solution follows the Onion architecture, so references only ever point inwards.
+`FitTrack.Tests/ArchitectureTests.cs` fails the build's tests if that stops being true.
+
+| Project | Holds | References |
+| --- | --- | --- |
+| `FitTrack.Domain` | Entities and enums | nothing |
+| `FitTrack.Application` | Services, DTOs, and the ports they need (`Abstractions/`) | Domain |
+| `FitTrack.Infrastructure` | EF Core, repositories, migrations, seeder, JWT, BCrypt | Application |
+| `FitTrack.Api` | Controllers, query-string models, error responses, composition root | Application, Infrastructure |
+
+Services throw `NotFoundException`, `RuleViolationException` or
+`ValidationFailedException`; `ApplicationExceptionFilter` turns them into 404 and
+422 responses. `Program.cs` is the only Api code that uses Infrastructure types.
+
+Migrations now live in Infrastructure, so EF commands name both projects:
+
+```powershell
+dotnet ef migrations add <Name> --project FitTrack.Infrastructure --startup-project FitTrack.Api --output-dir Persistence/Migrations
+dotnet ef database update --project FitTrack.Infrastructure --startup-project FitTrack.Api
+```
+
 ## What's here so far
 
 `seed-data/` holds the Laravel seed data exported to JSON, which the C# seeder
