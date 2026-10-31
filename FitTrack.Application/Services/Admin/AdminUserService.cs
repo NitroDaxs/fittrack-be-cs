@@ -1,9 +1,10 @@
 using System.Security.Cryptography;
+using FitTrack.Application.Abstractions.Storage;
 
 namespace FitTrack.Application.Services.Admin;
 
 public class AdminUserService(
-    IUserRepository users, IExerciseRepository exercises, IUnitOfWork unitOfWork, IPasswordHasher hasher)
+    IUserRepository users, IExerciseRepository exercises, IUnitOfWork unitOfWork, IPasswordHasher hasher, IAvatarStorage avatars)
 {
     public async Task<PagedResult<UserDto>> GetPageAsync(AdminListRequest query, PageRequest paging)
     {
@@ -125,5 +126,10 @@ public class AdminUserService(
 
         users.Remove(user);
         await unitOfWork.SaveChangesAsync();
+
+        if (user.AvatarFile is not null)
+        {
+            avatars.Delete(user.AvatarFile);
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace FitTrack.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/me")]
-public class ProfileController(ProfileService profile) : ControllerBase
+public class ProfileController(ProfileService profile, AvatarService avatars) : ControllerBase
 {
     [HttpGet]
     public Task<UserDto> Show() => profile.GetAsync(User.GetUserId());
@@ -20,6 +20,18 @@ public class ProfileController(ProfileService profile) : ControllerBase
     [HttpPut("password")]
     public Task<AuthResponse> ChangePassword(ChangePasswordRequest request) =>
         profile.ChangePasswordAsync(User.GetUserId(), request);
+
+    [EnableRateLimiting(RateLimits.Uploads)]
+    [RequestSizeLimit(AvatarService.MaxBytes + 64 * 1024)]
+    [HttpPost("avatar")]
+    public async Task<UserDto> UploadAvatar(IFormFile file)
+    {
+        await using var content = file.OpenReadStream();
+        return await avatars.ReplaceAsync(User.GetUserId(), content, file.Length);
+    }
+
+    [HttpDelete("avatar")]
+    public Task<UserDto> RemoveAvatar() => avatars.RemoveAsync(User.GetUserId());
 
     [HttpGet("favorites")]
     [HttpGet("saved")]

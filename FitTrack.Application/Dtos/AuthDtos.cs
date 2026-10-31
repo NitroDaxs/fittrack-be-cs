@@ -9,7 +9,8 @@ public record UserDto(
     UserRole Role,
     Units Units,
     bool IsActive,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? AvatarUrl);
 
 public record AuthResponse(
     UserDto User,

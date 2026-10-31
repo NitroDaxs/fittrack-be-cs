@@ -13,6 +13,7 @@ public static class DependencyInjection
         services.AddScoped<PasswordResetService>();
         services.AddScoped<CalculatorService>();
         services.AddScoped<ProfileService>();
+        services.AddScoped<AvatarService>();
         services.AddScoped<DashboardService>();
         services.AddScoped<ExerciseService>();
         services.AddScoped<RoutineService>();

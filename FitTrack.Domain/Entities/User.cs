@@ -9,6 +9,7 @@ public class User : Timestamped
     public UserRole Role { get; set; } = UserRole.Member;
     public Units Units { get; set; } = Units.Metric;
     public bool IsActive { get; set; } = true;
+    public string? AvatarFile { get; set; }
 
     public List<WorkoutLog> WorkoutLogs { get; set; } = [];
     public List<BodyMeasurement> BodyMeasurements { get; set; } = [];

@@ -8,9 +8,11 @@ using FitTrack.Application.Services;
 using FitTrack.Infrastructure;
 using FitTrack.Infrastructure.Persistence;
 using FitTrack.Infrastructure.Security;
+using FitTrack.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
@@ -70,9 +72,8 @@ builder.Services.AddRateLimiter(options =>
     options.OnRejected = (context, cancellationToken) =>
         new ValueTask(context.HttpContext.Response.WriteAsJsonAsync(
             new { message = "Too many attempts. Please wait a minute and try again." }, cancellationToken));
-    options.AddPolicy(RateLimits.Auth, context => RateLimitPartition.GetFixedWindowLimiter(
-        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+    options.AddPolicy(RateLimits.Auth, TenPerMinutePerIp);
+    options.AddPolicy(RateLimits.Uploads, TenPerMinutePerIp);
 });
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -99,6 +100,23 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference().AllowAnonymous();
 }
 
+// Uploaded pictures are public. These headers stop a browser from ever treating one
+// as a page or script.
+var uploadsRoot = (app.Configuration.GetSection("Storage").Get<StorageOptions>() ?? new StorageOptions())
+    .UploadsRoot(app.Environment);
+Directory.CreateDirectory(uploadsRoot);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsRoot),
+    RequestPath = "/uploads",
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers.XContentTypeOptions = "nosniff";
+        context.Context.Response.Headers.ContentSecurityPolicy = "default-src 'none'; sandbox";
+        context.Context.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+    },
+});
+
 app.UseCors();
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -106,6 +124,11 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static RateLimitPartition<string> TenPerMinutePerIp(HttpContext context) =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) });
 
 static async Task ValidateSessionAsync(TokenValidatedContext context)
 {

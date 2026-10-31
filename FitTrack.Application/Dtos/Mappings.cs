@@ -5,7 +5,8 @@ namespace FitTrack.Application.Dtos;
 public static class Mappings
 {
     public static UserDto ToDto(this User user) =>
-        new(user.Id, user.Name, user.Email, user.Role, user.Units, user.IsActive, user.CreatedAt);
+        new(user.Id, user.Name, user.Email, user.Role, user.Units, user.IsActive, user.CreatedAt,
+            user.AvatarFile is null ? null : $"/uploads/avatars/{user.AvatarFile}");
 
     public static TaxonomyDto ToDto(this MuscleGroup group) => new(group.Id, group.Name, group.Slug);
 

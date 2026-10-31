@@ -35,6 +35,8 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddSingleton<IStorageInfo, DriveStorageInfo>();
+        services.Configure<StorageOptions>(configuration.GetSection("Storage"));
+        services.AddSingleton<IAvatarStorage, LocalAvatarStorage>();
 
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
         services.AddHttpClient<IAccountEmailSender, ResendEmailSender>(client =>

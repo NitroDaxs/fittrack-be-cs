@@ -101,6 +101,7 @@ for example `Jwt__Key`.
 | `Email:ResendApiKey` | Resend API key | Empty, so no emails are sent |
 | `Email:From` | Sender of account emails | `FitTrack <onboarding@resend.dev>` |
 | `Email:FrontendUrl` | Base URL for links in emails | `http://localhost:5173` |
+| `Storage:UploadsPath` | Folder for uploaded pictures, relative to the API project | `uploads` |
 | `Cors:AllowedOrigins` | Browser origins allowed to call the API | `http://localhost:5173` |
 
 ### Secrets
@@ -210,6 +211,7 @@ token with the `admin` role.
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET, PUT | `/me` | Read or update the name, email and units; changing the email needs `current_password` |
+| POST, DELETE | `/me/avatar` | Upload (multipart field `file`) or remove the profile picture |
 | PUT | `/me/password` | Change the password and get a new token; ends other sessions and is rate limited |
 | GET | `/me/saved` | Saved exercises and routines (`/me/favorites` is an alias) |
 | GET | `/me/dashboard` | Dashboard data |
@@ -355,6 +357,16 @@ Without `Email:ResendApiKey`, the API logs an error and sends nothing, but the
 endpoint still returns its normal response. Check the API log if an email doesn't
 arrive.
 
+## Profile pictures
+
+Pictures can be JPEG, PNG or WebP, up to 2 MB, with up to 10 uploads per minute from
+each IP address. The API checks the file's contents rather
+than its name, stores it under a random name, and serves it publicly from
+`/uploads/avatars`. Replacing a picture or deleting the account deletes the old file.
+
+Files are stored by `LocalAvatarStorage` behind the `IAvatarStorage` interface, so cloud
+storage only needs a new implementation of it.
+
 ## Database
 
 Migrations live in `FitTrack.Infrastructure/Persistence/Migrations`, and the API
@@ -398,7 +410,9 @@ tests.
    `Email__From`, `Email__FrontendUrl` and `Cors__AllowedOrigins__0` as environment
    variables. Generate a new `Jwt__Key` rather than reusing the development one.
 2. Apply migrations as a release step.
-3. Serve the API over HTTPS. The app doesn't redirect to HTTPS itself, so do this at
+3. Keep `Storage:UploadsPath` on a persistent disk and back it up. On hosts with
+   temporary disks, uploaded pictures are lost on each deploy unless you do this.
+4. Serve the API over HTTPS. The app doesn't redirect to HTTPS itself, so do this at
    your host or reverse proxy.
 
 The docs pages at `/scalar/v1` and `/openapi/v1.json` are only available in
@@ -409,4 +423,6 @@ Development.
 - Logging out doesn't revoke the token on the server.
 - Rate limits use the connecting IP address, so behind a reverse proxy the app needs
   forwarded headers set up, or all visitors share one limit.
+- Uploaded pictures keep their original metadata, which can include the location a
+  photo was taken.
 - Progress-photo upload and social sign-in aren't implemented.
