@@ -14,6 +14,7 @@ public class AdminExercisesController(AppDbContext db) : ControllerBase
         ["name"] = e => e.Name,
         ["difficulty"] = e => e.Difficulty,
         ["exercise_type"] = e => e.ExerciseType,
+        ["equipment"] = e => e.Equipment.Select(l => l.Equipment.Name).OrderBy(name => name).FirstOrDefault()!,
         ["created_at"] = e => e.CreatedAt,
     };
     
@@ -88,8 +89,14 @@ public class AdminExercisesController(AppDbContext db) : ControllerBase
 
         if (request.Name is not null)
         {
+            var slug = Slug.From(request.Name);
+            if (await db.Exercises.AnyAsync(e => e.Slug == slug && e.Id != id))
+            {
+                return ApiErrors.Field("name", "An exercise with this name already exists.");
+            }
+
             exercise.Name = request.Name;
-            exercise.Slug = Slug.From(request.Name);
+            exercise.Slug = slug;
         }
         exercise.Description = request.Description ?? exercise.Description;
         exercise.Instructions = request.Instructions ?? exercise.Instructions;

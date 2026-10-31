@@ -13,5 +13,6 @@ public class TaxonomiesController(AppDbContext db) : ControllerBase
         EnumValues.Options<Difficulty>(),
         EnumValues.Options<ExerciseCategory>(),
         EnumValues.Options<ArticleCategory>(),
-        EnumValues.Options<RoutineGoal>());
+        EnumValues.Options<RoutineGoal>(),
+        await db.Articles.Select(a => a.Author.Name).Distinct().OrderBy(name => name).ToListAsync());
 }

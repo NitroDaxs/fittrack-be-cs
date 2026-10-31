@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FitTrack.Api.Dtos;
 
@@ -13,6 +14,7 @@ public class AdminListQuery : PageQuery
     public string? Role { get; set; }
     public string? Goal { get; set; }
     public string? Level { get; set; }
+    public string? Author { get; set; }
 }
 
 public record ExerciseRequest
@@ -76,10 +78,15 @@ public record AdminUserRequest
 }
 
 public record AdminStatsDto(
-    int TotalExercises, string ExerciseDelta,
-    int TotalRoutines, string RoutineDelta,
-    int PublishedArticles, string ArticleDelta,
-    int TotalUsers, string UserDelta,
-    int ApiUptime, int StorageCapacity);
+    [property: JsonPropertyName("totalExercises")] int TotalExercises,
+    [property: JsonPropertyName("exerciseDelta")] string ExerciseDelta,
+    [property: JsonPropertyName("totalRoutines")] int TotalRoutines,
+    [property: JsonPropertyName("routineDelta")] string RoutineDelta,
+    [property: JsonPropertyName("publishedArticles")] int PublishedArticles,
+    [property: JsonPropertyName("articleDelta")] string ArticleDelta,
+    [property: JsonPropertyName("totalUsers")] int TotalUsers,
+    [property: JsonPropertyName("userDelta")] string UserDelta,
+    [property: JsonPropertyName("apiUptime")] int ApiUptime,
+    [property: JsonPropertyName("storageCapacity")] int StorageCapacity);
 
 public record ActivityDto(string Id, string Icon, string Tone, string Text, string Meta);

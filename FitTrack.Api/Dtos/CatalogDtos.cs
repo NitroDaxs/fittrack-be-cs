@@ -12,7 +12,8 @@ public record TaxonomiesDto(
     List<OptionDto> Categories,
     [property: JsonPropertyName("articleCategories")]
     List<OptionDto> ArticleCategories,
-    List<OptionDto> Goals);
+    List<OptionDto> Goals,
+    List<string> Authors);
 
 public record PivotDto(MuscleRole Role);
 

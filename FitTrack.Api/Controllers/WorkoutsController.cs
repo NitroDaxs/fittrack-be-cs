@@ -9,12 +9,25 @@ namespace FitTrack.Api.Controllers;
 public class WorkoutsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<PagedResult<WorkoutLogDto>> Index([FromQuery] PageQuery paging)
+    public async Task<PagedResult<WorkoutLogDto>> Index([FromQuery] PageQuery paging, [FromQuery] string? search,
+        [FromQuery] string? range)
     {
         var userId = User.GetUserId();
 
-        return await db.WorkoutLogs.AsNoTracking().WithSets()
-            .Where(l => l.UserId == userId)
+        var logs = db.WorkoutLogs.AsNoTracking().WithSets().Where(l => l.UserId == userId);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var pattern = $"%{search.Trim()}%";
+            logs = logs.Where(l => EF.Functions.ILike(l.Name, pattern));
+        }
+
+        if (RangeStart(range) is { } since)
+        {
+            logs = logs.Where(l => l.Date >= since);
+        }
+
+        return await logs
             .OrderByDescending(l => l.Date)
             .PaginateAsync(paging, defaultPerPage: 10, l => l.ToDto());
     }
@@ -77,6 +90,18 @@ public class WorkoutsController(AppDbContext db) : ControllerBase
         return CreatedAtAction(nameof(Show), new { id = log.Id }, saved.ToDto());
     }
     
+    private static DateTime? RangeStart(string? range)
+    {
+        var now = DateTime.UtcNow;
+        return range switch
+        {
+            "Last 7 Days" => now.AddDays(-7),
+            "Last 30 Days" => now.AddDays(-30),
+            "This Month" => new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc),
+            _ => null,
+        };
+    }
+
     private static DateTime? ToUtc(DateTime? value) => value switch
     {
         null => null,

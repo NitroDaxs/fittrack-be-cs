@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FitTrack.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
@@ -16,7 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options
 builder.Services
     .AddControllers(options =>
         options.ModelMetadataDetailsProviders.Add(
-            new SystemTextJsonValidationMetadataProvider(JsonNamingPolicy.SnakeCaseLower)))
+            new BodyValidationNames(JsonNamingPolicy.SnakeCaseLower)))
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;

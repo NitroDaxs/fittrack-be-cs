@@ -15,6 +15,7 @@ public class AdminRoutinesController(AppDbContext db) : ControllerBase
         ["goal"] = r => r.Goal,
         ["level"] = r => r.Level,
         ["days_per_week"] = r => r.DaysPerWeek,
+        ["daysPerWeek"] = r => r.DaysPerWeek,
         ["created_at"] = r => r.CreatedAt,
     };
     
@@ -98,8 +99,14 @@ public class AdminRoutinesController(AppDbContext db) : ControllerBase
 
         if (request.Title is not null)
         {
+            var slug = Slug.From(request.Title);
+            if (await db.Routines.AnyAsync(r => r.Slug == slug && r.Id != id))
+            {
+                return ApiErrors.Field("title", "A routine with this title already exists.");
+            }
+
             routine.Title = request.Title;
-            routine.Slug = Slug.From(request.Title);
+            routine.Slug = slug;
         }
         routine.Description = request.Description ?? routine.Description;
         routine.Goal = request.Goal ?? routine.Goal;
@@ -135,6 +142,8 @@ public class AdminRoutinesController(AppDbContext db) : ControllerBase
         }
 
         var userId = User.GetUserId();
+        // RoutineId is nullable, so Clear() alone would leave the old days behind as orphans.
+        db.Workouts.RemoveRange(routine.Workouts);
         routine.Workouts.Clear();
         routine.Workouts.AddRange(days.Select((day, dayIndex) => new Workout
         {

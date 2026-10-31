@@ -15,7 +15,7 @@ public class RoutinesController(AppDbContext db) : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var pattern = $"^{search.Trim()}$";
+            var pattern = $"%{search.Trim()}%";
             routines = routines.Where(r => 
                 EF.Functions.ILike(r.Title, pattern) || EF.Functions.ILike(r.Description ?? "", pattern));
         }

@@ -16,7 +16,7 @@ public class ArticlesController(AppDbContext db) : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var pattern = $"^{search.Trim()}$";
+            var pattern = $"%{search.Trim()}%";
             articles = articles.Where(a => EF.Functions.ILike(a.Title, pattern) || EF.Functions.ILike(a.Body, pattern));
         }
 

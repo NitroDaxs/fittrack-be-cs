@@ -16,6 +16,8 @@ public class AdminUsersController(AppDbContext db) : ControllerBase
         ["email"] = u => u.Email,
         ["role"] = u => u.Role,
         ["created_at"] = u => u.CreatedAt,
+        ["joined"] = u => u.CreatedAt,
+        ["status"] = u => u.IsActive,
     };
     
     [HttpGet]
@@ -85,6 +87,11 @@ public class AdminUsersController(AppDbContext db) : ControllerBase
         if (user.Id == User.GetUserId() && request.Role == UserRole.Member)
         {
             return ApiErrors.Message("You cannot remove your own admin role.");
+        }
+
+        if (user.Id == User.GetUserId() && request.IsActive == false)
+        {
+            return ApiErrors.Message("You cannot deactivate your own account.");
         }
 
         if (request.Email is not null)

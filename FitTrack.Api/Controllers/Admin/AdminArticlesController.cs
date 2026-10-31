@@ -18,6 +18,8 @@ public class AdminArticlesController(AppDbContext db) : ControllerBase
         ["status"] = a => a.Status,
         ["published_at"] = a => a.PublishedAt!,
         ["created_at"] = a => a.CreatedAt,
+        ["date"] = a => a.PublishedAt ?? a.CreatedAt,
+        ["author"] = a => a.Author.Name,
     };
     
     [HttpGet]
@@ -33,6 +35,14 @@ public class AdminArticlesController(AppDbContext db) : ControllerBase
         if (EnumValues.TryParse<ArticleStatus>(query.Status, out var status))
         {
             articles = articles.Where(a => a.Status == status);
+        }
+        if (EnumValues.TryParse<ArticleCategory>(query.Category, out var category))
+        {
+            articles = articles.Where(a => a.Category == category);
+        }
+        if (!string.IsNullOrWhiteSpace(query.Author))
+        {
+            articles = articles.Where(a => a.Author.Name == query.Author);
         }
 
         return await articles
@@ -81,8 +91,14 @@ public class AdminArticlesController(AppDbContext db) : ControllerBase
 
         if (request.Title is not null)
         {
+            var slug = Slug.From(request.Title);
+            if (await db.Articles.AnyAsync(a => a.Slug == slug && a.Id != id))
+            {
+                return ApiErrors.Field("title", "An article with this title already exists.");
+            }
+
             article.Title = request.Title;
-            article.Slug = Slug.From(request.Title);
+            article.Slug = slug;
         }
         article.Category = request.Category ?? article.Category;
 
