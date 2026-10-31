@@ -209,7 +209,8 @@ token with the `admin` role.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET, PUT | `/me` | Read or update the profile, email, units and password |
+| GET, PUT | `/me` | Read or update the name, email and units; changing the email needs `current_password` |
+| PUT | `/me/password` | Change the password and get a new token; ends other sessions and is rate limited |
 | GET | `/me/saved` | Saved exercises and routines (`/me/favorites` is an alias) |
 | GET | `/me/dashboard` | Dashboard data |
 | GET | `/me/exercises/{id}/progression` | Strength history for one exercise |
@@ -330,14 +331,15 @@ Send it with each request as `Authorization: Bearer <jwt>`.
 
 Each authenticated request also checks the token against the account. Suspending or
 deleting a user, or changing their password, ends their sessions straight away, and
-role changes apply on the next request.
+role changes apply on the next request. `PUT /me/password` returns a new token, so the
+person changing their password stays logged in.
 
 `POST /logout` doesn't revoke the token. The client logs out by discarding it, and a
 copy of that token would stay valid until it expires.
 
 Endpoints need a signed-in user by default, so a public one must opt out with
-`[AllowAnonymous]`. Register, login, forgot password and reset password allow 10
-requests per minute from each IP address, then return 429.
+`[AllowAnonymous]`. Register, login, forgot password, reset password and change password
+allow 10 requests per minute from each IP address, then return 429.
 
 ## Password reset
 

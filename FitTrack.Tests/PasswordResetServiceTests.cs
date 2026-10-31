@@ -113,7 +113,7 @@ public class PasswordResetServiceTests
         await Assert.ThrowsAsync<ValidationFailedException>(() => _service.ResetAsync(Reset("made-up")));
     }
 
-    private class FakeTokens : IPasswordResetTokenRepository
+    internal class FakeTokens : IPasswordResetTokenRepository
     {
         public List<PasswordResetToken> Items { get; } = [];
 
@@ -143,13 +143,13 @@ public class PasswordResetServiceTests
         }
     }
 
-    private class FakeHasher : IPasswordHasher
+    internal class FakeHasher : IPasswordHasher
     {
         public string Hash(string password) => $"hashed:{password}";
         public bool Verify(string password, string hash) => hash == Hash(password);
     }
 
-    private class FakeUnitOfWork : IUnitOfWork
+    internal class FakeUnitOfWork : IUnitOfWork
     {
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => Task.FromResult(1);
     }
@@ -166,8 +166,9 @@ public class PasswordResetServiceTests
             throw new NotSupportedException();
 
         public Task<User> GetAsync(int id) => throw new NotSupportedException();
-        public Task<User> GetForUpdateAsync(int id) => throw new NotSupportedException();
-        public Task<bool> EmailTakenAsync(string email, int? exceptId = null) => throw new NotSupportedException();
+        public Task<User> GetForUpdateAsync(int id) => Task.FromResult(Items.First(u => u.Id == id));
+        public Task<bool> EmailTakenAsync(string email, int? exceptId = null) =>
+            Task.FromResult(Items.Any(u => u.Email == email && u.Id != exceptId));
         public void Add(User user) => throw new NotSupportedException();
         public void Remove(User user) => throw new NotSupportedException();
     }

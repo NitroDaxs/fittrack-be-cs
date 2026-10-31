@@ -46,7 +46,21 @@ public record UpdateProfileRequest
     [MaxLength(255)] public string? Name { get; init; }
     [EmailAddress] public string? Email { get; init; }
     public Units? Units { get; init; }
+
+    /// <summary>Required when changing the email.</summary>
     public string? CurrentPassword { get; init; }
-    [MinLength(8)] public string? NewPassword { get; init; }
-    [Compare(nameof(NewPassword))] public string? NewPasswordConfirmation { get; init; }
+}
+
+public record ChangePasswordRequest
+{
+    [Required(ErrorMessage = "Enter your current password.")]
+    public string CurrentPassword { get; init; } = "";
+
+    [Required(ErrorMessage = "Choose a new password.")]
+    [RegularExpression(@"^(?=.*\d).{8,}$", ErrorMessage = "Use at least 8 characters, including a number.")]
+    public string NewPassword { get; init; } = "";
+
+    [Required(ErrorMessage = "Confirm your new password.")]
+    [Compare(nameof(NewPassword), ErrorMessage = "The passwords do not match.")]
+    public string NewPasswordConfirmation { get; init; } = "";
 }
