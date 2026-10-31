@@ -26,20 +26,19 @@ public class DashboardService(AppDbContext db)
     
     public static int CurrentStreak(IReadOnlyList<DateOnly> trainingDaysNewestFirst, DateOnly today)
     {
-        var streak = 0;
-        var cursor = today;
-
-        foreach (var day in trainingDaysNewestFirst)
+        if (trainingDaysNewestFirst.Count == 0 || trainingDaysNewestFirst[0] < today.AddDays(-1))
         {
-            if (day == cursor || day == cursor.AddDays(-1))
-            {
-                streak++;
-                cursor = day.AddDays(-1);
-            }
-            else
+            return 0;
+        }
+        
+        var streak = 1;
+        for (var i = 1; i < trainingDaysNewestFirst.Count; i++)
+        {
+            if (trainingDaysNewestFirst[i] != trainingDaysNewestFirst[i - 1].AddDays(-1))
             {
                 break;
             }
+            streak++;
         }
 
         return streak;
