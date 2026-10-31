@@ -56,6 +56,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy => policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
 
 builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<DbSeeder>();
 
 builder.Services.AddOpenApi();
