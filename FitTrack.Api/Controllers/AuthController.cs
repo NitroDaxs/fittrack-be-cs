@@ -1,4 +1,5 @@
 using FitTrack.Application.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,13 +9,19 @@ namespace FitTrack.Api.Controllers;
 [Route("api")]
 public class AuthController(AuthService auth, PasswordResetService passwordReset) : ControllerBase
 {
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimits.Auth)]
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request) =>
         StatusCode(StatusCodes.Status201Created, await auth.RegisterAsync(request));
 
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimits.Auth)]
     [HttpPost("login")]
     public Task<AuthResponse> Login(LoginRequest request) => auth.LoginAsync(request);
 
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimits.Auth)]
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
     {
@@ -22,6 +29,8 @@ public class AuthController(AuthService auth, PasswordResetService passwordReset
         return Ok(new { message = "If an account exists for that email, we've sent a password reset link." });
     }
 
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimits.Auth)]
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
     {

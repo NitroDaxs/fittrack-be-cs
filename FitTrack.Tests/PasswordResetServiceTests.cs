@@ -154,7 +154,7 @@ public class PasswordResetServiceTests
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => Task.FromResult(1);
     }
 
-    private class FakeUsers : IUserRepository
+    internal class FakeUsers : IUserRepository
     {
         public List<User> Items { get; } = [];
 

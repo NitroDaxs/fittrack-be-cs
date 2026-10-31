@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FitTrack.Application.Services;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -22,7 +23,8 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
                 new Claim("sub", user.Id.ToString()),
                 new Claim("name", user.Name),
                 new Claim("email", user.Email),
-                new Claim("role", user.Role.ToValue())
+                new Claim("role", user.Role.ToValue()),
+                new Claim(TokenClaims.Stamp, SessionService.StampFor(user)),
             ]),
             SigningCredentials = new SigningCredentials(
                 new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),

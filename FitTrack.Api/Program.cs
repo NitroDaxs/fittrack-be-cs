@@ -1,11 +1,16 @@
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using FitTrack.Application;
+using FitTrack.Application.Services;
 using FitTrack.Infrastructure;
 using FitTrack.Infrastructure.Persistence;
 using FitTrack.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
@@ -50,9 +55,25 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
             NameClaimType = "name",
             RoleClaimType = "role",
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
         };
+        options.Events = new JwtBearerEvents { OnTokenValidated = ValidateSessionAsync };
     });
-builder.Services.AddAuthentication();
+
+// Every endpoint needs a signed-in user unless it opts out with [AllowAnonymous].
+builder.Services.AddAuthorization(options =>
+    options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = (context, cancellationToken) =>
+        new ValueTask(context.HttpContext.Response.WriteAsJsonAsync(
+            new { message = "Too many attempts. Please wait a minute and try again." }, cancellationToken));
+    options.AddPolicy(RateLimits.Auth, context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) }));
+});
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
@@ -74,13 +95,37 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.MapOpenApi().AllowAnonymous();
+    app.MapScalarApiReference().AllowAnonymous();
 }
 
 app.UseCors();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static async Task ValidateSessionAsync(TokenValidatedContext context)
+{
+    var identity = (ClaimsIdentity)context.Principal!.Identity!;
+    var user = int.TryParse(identity.FindFirst("sub")?.Value, out var userId)
+        ? await context.HttpContext.RequestServices.GetRequiredService<SessionService>()
+            .FindValidUserAsync(userId, identity.FindFirst(TokenClaims.Stamp)?.Value)
+        : null;
+
+    if (user is null)
+    {
+        context.Fail("The session is no longer valid.");
+        return;
+    }
+
+    // The role may have changed since the token was issued.
+    foreach (var claim in identity.FindAll("role").ToList())
+    {
+        identity.RemoveClaim(claim);
+    }
+
+    identity.AddClaim(new Claim("role", user.Role.ToValue()));
+}

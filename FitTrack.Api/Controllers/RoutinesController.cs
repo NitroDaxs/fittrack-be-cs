@@ -1,9 +1,11 @@
 using FitTrack.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FitTrack.Api.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/routines")]
 public class RoutinesController(RoutineService routines) : ControllerBase
 {

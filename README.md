@@ -328,8 +328,16 @@ curl -X POST http://localhost:8000/api/calculators/bmi \
 
 Send it with each request as `Authorization: Bearer <jwt>`.
 
-Tokens are stateless, so `POST /logout` doesn't revoke anything. The client logs out
-by discarding its token, which otherwise stays valid until it expires.
+Each authenticated request also checks the token against the account. Suspending or
+deleting a user, or changing their password, ends their sessions straight away, and
+role changes apply on the next request.
+
+`POST /logout` doesn't revoke the token. The client logs out by discarding it, and a
+copy of that token would stay valid until it expires.
+
+Endpoints need a signed-in user by default, so a public one must opt out with
+`[AllowAnonymous]`. Register, login, forgot password and reset password allow 10
+requests per minute from each IP address, then return 429.
 
 ## Password reset
 
@@ -396,7 +404,7 @@ Development.
 
 ## Known limitations
 
-- Login and password reset routes have no rate limiting beyond the one-minute reset
-  email cooldown.
-- Tokens can't be revoked before they expire, including after a password change.
+- Logging out doesn't revoke the token on the server.
+- Rate limits use the connecting IP address, so behind a reverse proxy the app needs
+  forwarded headers set up, or all visitors share one limit.
 - Progress-photo upload and social sign-in aren't implemented.
