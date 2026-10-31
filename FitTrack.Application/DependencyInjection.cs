@@ -10,6 +10,7 @@ public static class DependencyInjection
     {
         services.AddScoped<AuthService>();
         services.AddScoped<PasswordResetService>();
+        services.AddScoped<CalculatorService>();
         services.AddScoped<ProfileService>();
         services.AddScoped<DashboardService>();
         services.AddScoped<ExerciseService>();
