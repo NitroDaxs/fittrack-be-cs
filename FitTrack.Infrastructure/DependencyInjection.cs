@@ -1,3 +1,5 @@
+using FitTrack.Application.Abstractions.Email;
+using FitTrack.Infrastructure.Email;
 using FitTrack.Infrastructure.Persistence;
 using FitTrack.Infrastructure.Persistence.Repositories;
 using FitTrack.Infrastructure.Security;
@@ -24,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IBodyMeasurementRepository, BodyMeasurementRepository>();
         services.AddScoped<IFavoritesRepository, FavoritesRepository>();
         services.AddScoped<ITaxonomyRepository, TaxonomyRepository>();
+        services.AddScoped<IPasswordResetTokenRepository, PasswordResetTokenRepository>();
         services.AddScoped<IDashboardQueries, DashboardQueries>();
         services.AddScoped<IAdminStatsQueries, AdminStatsQueries>();
         services.AddScoped<DbSeeder>();
@@ -32,6 +35,13 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddSingleton<IStorageInfo, DriveStorageInfo>();
+
+        services.Configure<EmailOptions>(configuration.GetSection("Email"));
+        services.AddHttpClient<IAccountEmailSender, ResendEmailSender>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FitTrack/1.0");
+        });
 
         return services;
     }

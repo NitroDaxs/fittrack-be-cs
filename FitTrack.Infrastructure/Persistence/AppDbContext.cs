@@ -19,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Article> Articles => Set<Article>();
     public DbSet<SavedExercise> SavedExercises => Set<SavedExercise>();
     public DbSet<SavedRoutine> SavedRoutines => Set<SavedRoutine>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
@@ -38,6 +39,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<User>(user => { user.HasIndex(u => u.Email).IsUnique(); });
+
+        builder.Entity<PasswordResetToken>().HasIndex(t => t.TokenHash).IsUnique();
 
         builder.Entity<MuscleGroup>().HasIndex(m => m.Slug).IsUnique();
         builder.Entity<Equipment>().HasIndex(e => e.Slug).IsUnique();

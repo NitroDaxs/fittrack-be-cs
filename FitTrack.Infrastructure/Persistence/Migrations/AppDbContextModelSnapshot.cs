@@ -352,6 +352,49 @@ namespace FitTrack.Infrastructure.Persistence.Migrations
                     b.ToTable("muscle_groups", (string)null);
                 });
 
+            modelBuilder.Entity("FitTrack.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("token_hash");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_password_reset_tokens");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_password_reset_tokens_token_hash");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_password_reset_tokens_user_id");
+
+                    b.ToTable("password_reset_tokens", (string)null);
+                });
+
             modelBuilder.Entity("FitTrack.Domain.Entities.Routine", b =>
                 {
                     b.Property<int>("Id")
@@ -872,6 +915,18 @@ namespace FitTrack.Infrastructure.Persistence.Migrations
                     b.Navigation("Exercise");
 
                     b.Navigation("MuscleGroup");
+                });
+
+            modelBuilder.Entity("FitTrack.Domain.Entities.PasswordResetToken", b =>
+                {
+                    b.HasOne("FitTrack.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_password_reset_tokens_users_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("FitTrack.Domain.Entities.Routine", b =>

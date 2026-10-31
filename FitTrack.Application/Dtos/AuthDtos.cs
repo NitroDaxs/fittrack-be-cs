@@ -23,6 +23,18 @@ public record RegisterRequest
     [Required, MinLength(8)] public string Password { get; init; } = "";
 }
 
+public record ForgotPasswordRequest
+{
+    [Required, EmailAddress] public string Email { get; init; } = "";
+}
+
+public record ResetPasswordRequest
+{
+    [Required] public string Token { get; init; } = "";
+    [Required, MinLength(8)] public string Password { get; init; } = "";
+    [Required, Compare(nameof(Password))] public string PasswordConfirmation { get; init; } = "";
+}
+
 public record LoginRequest
 {
     [Required, EmailAddress] public string Email { get; init; } = "";
