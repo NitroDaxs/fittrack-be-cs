@@ -27,6 +27,7 @@ public record RoutineRequest
     public Difficulty? Level { get; init; }
     [Range(1, 7)] public int? DaysPerWeek { get; init; }
     public bool? IsPublic { get; init; }
+    [MaxLength(2048)] public string? ImageUrl { get; init; }
     public List<RoutineDayRequest>? Days { get; init; }
 }
 

@@ -6,6 +6,7 @@ public class Routine : Timestamped
     public string Title { get; set; } = "";
     public string Slug { get; set; } = "";
     public string? Description { get; set; }
+    public string? ImageUrl { get; set; }
     public RoutineGoal Goal { get; set; }
     public Difficulty Level { get; set; }
     public int DaysPerWeek { get; set; }

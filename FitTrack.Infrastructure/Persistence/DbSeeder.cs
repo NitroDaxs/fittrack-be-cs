@@ -18,7 +18,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
         List<string> Equipment, List<string> Primary, List<string> Secondary,
         string Description, List<string> Instructions);
 
-    private record RoutineSeed(string Title, string Description, int DaysPerWeek, string Goal, string Level, List<string> Workouts);
+    private record RoutineSeed(string Title, string? Image, string Description, int DaysPerWeek, string Goal, string Level, List<string> Workouts);
 
     private record ArticleSeed(string Title, string Category, string? Image, JsonElement Body);
 
@@ -107,6 +107,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
             Title = seed.Title,
             Slug = Slug.From(seed.Title),
             Description = seed.Description,
+            ImageUrl = seed.Image,
             DaysPerWeek = seed.DaysPerWeek,
             Goal = EnumValues.Parse<RoutineGoal>(seed.Goal),
             Level = EnumValues.Parse<Difficulty>(seed.Level),

@@ -1,6 +1,7 @@
 [
     {
         "title": "Push Pull Legs Hypertrophy",
+        "image": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1200&q=75",
         "description": "Classic 6-day split designed for maximum muscle growth and recovery.",
         "days_per_week": 6,
         "goal": "hypertrophy",
@@ -13,6 +14,7 @@
     },
     {
         "title": "Starting 5x5 Strength",
+        "image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=1200&q=75",
         "description": "A linear progression strength building routine ideal for beginners.",
         "days_per_week": 3,
         "goal": "strength",
@@ -24,6 +26,7 @@
     },
     {
         "title": "Upper Lower Power",
+        "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=75",
         "description": "4-day split blending heavy powerlifting movements with accessory work.",
         "days_per_week": 4,
         "goal": "strength",

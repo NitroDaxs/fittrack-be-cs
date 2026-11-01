@@ -65,7 +65,8 @@ public record RoutineDto(
     bool IsPublic,
     bool IsPublished,
     DateTime CreatedAt,
-    CreatorDto? Creator)
+    CreatorDto? Creator,
+    string? ImageUrl)
 {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<WorkoutDto>? Workouts { get; init; }

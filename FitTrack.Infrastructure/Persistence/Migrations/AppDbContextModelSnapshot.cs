@@ -429,6 +429,10 @@ namespace FitTrack.Infrastructure.Persistence.Migrations
                         .HasColumnType("text")
                         .HasColumnName("goal");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("image_url");
+
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean")
                         .HasColumnName("is_public");

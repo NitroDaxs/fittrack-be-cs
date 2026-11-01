@@ -23,7 +23,7 @@ public static class Mappings
 
     public static RoutineDto ToDto(this Routine r, bool withProgramme = false) =>
         new(r.Id, r.Title, r.Slug, r.Description, r.Goal, r.Level, r.DaysPerWeek, r.IsPublic, r.IsPublished,
-            r.CreatedAt, r.Creator is null ? null : new CreatorDto(r.Creator.Id, r.Creator.Name))
+            r.CreatedAt, r.Creator is null ? null : new CreatorDto(r.Creator.Id, r.Creator.Name), r.ImageUrl)
         {
             Workouts = withProgramme ? r.Workouts.OrderBy(w => w.DayOrder).Select(ToDto).ToList() : null,
         };

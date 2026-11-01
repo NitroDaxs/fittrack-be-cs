@@ -27,13 +27,15 @@ public class AdminRoutineService(IRoutineRepository routines, IExerciseRepositor
             (string.IsNullOrWhiteSpace(request.Title), "title", "The title field is required."),
             (request.Goal is null, "goal", "The goal field is required."),
             (request.Level is null, "level", "The level field is required."),
-            (request.DaysPerWeek is null, "days_per_week", "The days per week field is required."));
+            (request.DaysPerWeek is null, "days_per_week", "The days per week field is required."),
+            (!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
 
         var routine = new Routine
         {
             Title = request.Title!,
             Slug = Slug.From(request.Title!),
             Description = request.Description,
+            ImageUrl = ImageUrls.Normalize(request.ImageUrl),
             Goal = request.Goal!.Value,
             Level = request.Level!.Value,
             DaysPerWeek = request.DaysPerWeek!.Value,
@@ -61,6 +63,14 @@ public class AdminRoutineService(IRoutineRepository routines, IExerciseRepositor
     {
         var routine = await routines.FindForUpdateAsync(id)
                       ?? throw new NotFoundException("Routine not found.");
+
+        ValidationFailedException.ThrowIfAny((!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
+
+        // Null keeps the current image; an empty string removes it.
+        if (request.ImageUrl is not null)
+        {
+            routine.ImageUrl = ImageUrls.Normalize(request.ImageUrl);
+        }
 
         if (request.Title is not null)
         {
