@@ -76,7 +76,7 @@ public static class Mappings
             Author: a.Author?.Name ?? "FitTrack",
             Date: DateOnly.FromDateTime(a.PublishedAt ?? a.CreatedAt),
             ReadMinutes: Math.Max(1, (int)Math.Ceiling(words / 200.0)),
-            Image: "");
+            Image: a.ImageUrl ?? "");
     }
 
     public static JsonElement Blocks(string body)

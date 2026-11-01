@@ -25,7 +25,8 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
     {
         ValidationFailedException.ThrowIfAny(
             (string.IsNullOrWhiteSpace(request.Title), "title", "The title field is required."),
-            (request.Category is null, "category", "The category field is required."));
+            (request.Category is null, "category", "The category field is required."),
+            (!IsValidImageUrl(request.ImageUrl), "image_url", InvalidImageUrl));
 
         var status = request.Status ?? ArticleStatus.Draft;
         var article = new Article
@@ -34,6 +35,7 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
             Slug = Slug.From(request.Title!),
             Body = ToBlocksJson(request.Body, request.Excerpt),
             Category = request.Category!.Value,
+            ImageUrl = NormalizeImageUrl(request.ImageUrl),
             Status = status,
             PublishedAt = status == ArticleStatus.Published ? DateTime.UtcNow : null,
             AuthorId = userId,
@@ -54,6 +56,14 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
     {
         var article = await articles.FindAsync(id)
                       ?? throw new NotFoundException("Article not found.");
+
+        ValidationFailedException.ThrowIfAny((!IsValidImageUrl(request.ImageUrl), "image_url", InvalidImageUrl));
+
+        // Null keeps the current image; an empty string removes it.
+        if (request.ImageUrl is not null)
+        {
+            article.ImageUrl = NormalizeImageUrl(request.ImageUrl);
+        }
 
         if (request.Title is not null)
         {
@@ -94,6 +104,16 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
             throw new NotFoundException("Article not found.");
         }
     }
+
+    private const string InvalidImageUrl = "The image URL must be a valid http or https address.";
+
+    private static bool IsValidImageUrl(string? url) =>
+        string.IsNullOrWhiteSpace(url)
+        || (Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps));
+
+    private static string? NormalizeImageUrl(string? url) =>
+        string.IsNullOrWhiteSpace(url) ? null : url.Trim();
 
     private static string ToBlocksJson(JsonElement? body, string? excerpt)
     {

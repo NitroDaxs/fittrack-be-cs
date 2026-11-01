@@ -20,7 +20,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
 
     private record RoutineSeed(string Title, string Description, int DaysPerWeek, string Goal, string Level, List<string> Workouts);
 
-    private record ArticleSeed(string Title, string Category, JsonElement Body);
+    private record ArticleSeed(string Title, string Category, string? Image, JsonElement Body);
 
     public async Task SeedAsync()
     {
@@ -147,6 +147,7 @@ public class DbSeeder(AppDbContext db, IHostEnvironment env, ILogger<DbSeeder> l
             Title = seed.Title,
             Slug = Slug.From(seed.Title),
             Body = seed.Body.GetRawText(),
+            ImageUrl = seed.Image,
             Category = EnumValues.Parse<ArticleCategory>(seed.Category),
             Status = ArticleStatus.Published,
             PublishedAt = DateTime.UtcNow.AddDays(-7 * i),

@@ -8,6 +8,7 @@ public class Article : Timestamped
     public string Body { get; set; } = "[]";
     public ArticleCategory Category { get; set; }
     public ArticleStatus Status { get; set; } = ArticleStatus.Draft;
+    public string? ImageUrl { get; set; }
     public DateTime? PublishedAt { get; set; }
 
     public int AuthorId { get; set; }

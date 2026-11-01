@@ -53,6 +53,7 @@ public record ArticleRequest
     public ArticleStatus? Status { get; init; }
     public JsonElement? Body { get; init; }
     public string? Excerpt { get; init; }
+    [MaxLength(2048)] public string? ImageUrl { get; init; }
 }
 
 public record AdminUserRequest
