@@ -35,7 +35,9 @@ public class ArchitectureTests
             || name.StartsWith("Microsoft.EntityFrameworkCore")
             || name.StartsWith("Npgsql")
             || name.StartsWith("Microsoft.AspNetCore")
-            || name.StartsWith("BCrypt"));
+            || name.StartsWith("BCrypt")
+            || name.StartsWith("OpenAI")
+            || name is "Microsoft.Extensions.AI" or "Microsoft.Extensions.AI.OpenAI" or "System.ClientModel");
     }
 
     [Fact]

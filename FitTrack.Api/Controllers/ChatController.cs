@@ -12,6 +12,6 @@ namespace FitTrack.Api.Controllers;
 public class ChatController(ChatService chat) : ControllerBase
 {
     [HttpPost]
-    public Task<ChatResponse> Ask(ChatRequest request, CancellationToken cancellationToken) =>
+    public Task<ChatReplyDto> Ask(ChatRequest request, CancellationToken cancellationToken) =>
         chat.AskAsync(request, User.GetUserId(), cancellationToken);
 }

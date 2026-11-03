@@ -19,4 +19,4 @@ public record ChatRequest
 
 public record ChatCardsDto(List<ExerciseDto> Exercises, List<RoutineDto> Routines, List<ArticleDto> Articles);
 
-public record ChatResponse(string Reply, ChatCardsDto Cards);
+public record ChatReplyDto(string Reply, ChatCardsDto Cards);

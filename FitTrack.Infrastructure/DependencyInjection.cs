@@ -1,4 +1,3 @@
-using FitTrack.Application.Abstractions.Ai;
 using FitTrack.Application.Abstractions.Email;
 using FitTrack.Infrastructure.Ai;
 using FitTrack.Infrastructure.Email;
@@ -6,9 +5,9 @@ using FitTrack.Infrastructure.Persistence;
 using FitTrack.Infrastructure.Persistence.Repositories;
 using FitTrack.Infrastructure.Security;
 using FitTrack.Infrastructure.Storage;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace FitTrack.Infrastructure;
 
@@ -52,13 +51,12 @@ public static class DependencyInjection
             client.DefaultRequestHeaders.UserAgent.ParseAdd("FitTrack/1.0");
         });
 
-        services.Configure<OpenRouterOptions>(configuration.GetSection("OpenRouter"));
-        services.AddHttpClient<IChatModel, OpenRouterChatModel>((provider, client) =>
+        // Without an API key no IChatClient is registered, and ChatService answers that the assistant isn't set up.
+        var openRouter = configuration.GetSection("OpenRouter").Get<OpenRouterOptions>() ?? new OpenRouterOptions();
+        if (openRouter.IsConfigured)
         {
-            client.BaseAddress = new Uri(provider.GetRequiredService<IOptions<OpenRouterOptions>>().Value.BaseUrl);
-            client.Timeout = TimeSpan.FromSeconds(60);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("FitTrack/1.0");
-        });
+            services.AddChatClient(_ => OpenRouterChatClient.Create(openRouter)).AddMiddleware(openRouter);
+        }
 
         return services;
     }

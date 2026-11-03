@@ -1,110 +1,54 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
 namespace FitTrack.Application.Chat;
 
+/// <summary>
+/// Answers one chat message. The tool loop itself runs in the chat client's function invocation
+/// middleware, which Infrastructure sets up; this class builds the conversation and the tools.
+/// </summary>
 public class ChatService(
-    IChatModel model,
     IEnumerable<IChatTool> tools,
     IChatInstructions instructions,
-    ILogger<ChatService> logger)
+    ILogger<ChatService> logger,
+    IChatClient? chatClient = null)
 {
-    private const int MaxToolRounds = 5;
-
     private const int MaxHistoryTurns = 12;
     private const int MaxTurnLength = 4000;
 
-    private readonly Dictionary<string, IChatTool> _tools = tools.ToDictionary(tool => tool.Name);
-
-    public async Task<ChatResponse> AskAsync(ChatRequest request, int userId,
+    public async Task<ChatReplyDto> AskAsync(ChatRequest request, int userId,
         CancellationToken cancellationToken = default)
     {
-        if (!model.IsConfigured)
+        if (chatClient is null)
         {
             throw new ChatUnavailableException("The assistant isn't set up on this server.");
         }
 
         var messages = new List<ChatMessage>
         {
-            ChatMessage.Instructions(await instructions.BuildAsync(userId, request.Language))
+            new(ChatRole.System, await instructions.BuildAsync(userId, request.Language))
         };
 
         messages.AddRange(History(request.History));
-        messages.Add(ChatMessage.FromUser(request.Message!.Trim()));
+        messages.Add(new ChatMessage(ChatRole.User, request.Message!.Trim()));
 
-        var definitions = _tools.Values.Select(t => new ToolDefinition(t.Name, t.Description, t.Parameters)).ToList();
         var context = new ToolContext(userId, new ChatCards());
-        var usage = new List<ChatUsage>();
-
-        for (var round = 1; round <= MaxToolRounds; round++)
+        var options = new ChatOptions
         {
-            var reply = await model.CompleteAsync(messages, definitions, allowToolCalls: true, cancellationToken);
-            if (reply.Usage is not null) usage.Add(reply.Usage);
+            Tools = [.. tools.Select(tool => new ChatToolFunction(tool, context, logger))],
+            ToolMode = ChatToolMode.Auto,
+        };
 
-            if (reply.ToolCalls.Count == 0)
-            {
-                return Finish(reply.Text, context, usage, request.Language);
-            }
+        var response = await chatClient.GetResponseAsync(messages, options, cancellationToken);
 
-            messages.Add(ChatMessage.FromAssistant(reply.Text, reply.ToolCalls));
+        logger.LogInformation(
+            "Answered with {Calls} model call(s): {Prompt} prompt + {Completion} completion tokens",
+            response.Messages.Count(m => m.Role == ChatRole.Assistant),
+            response.Usage?.InputTokenCount ?? 0, response.Usage?.OutputTokenCount ?? 0);
 
-            foreach (var call in reply.ToolCalls)
-            {
-                var result = await RunToolAsync(call, context);
-                logger.LogInformation("Round {Round}: {Tool}({Arguments}) -> {Result}",
-                    round, call.Name, call.ArgumentsJson, Preview(result));
-                messages.Add(ChatMessage.ToolResult(call.Id, result));
-            }
-        }
-
-        logger.LogWarning("Reached {Max} tool rounds; asking for a final answer.", MaxToolRounds);
-        var last = await model.CompleteAsync(messages, definitions, allowToolCalls: false, cancellationToken);
-        if (last.Usage is not null) usage.Add(last.Usage);
-
-        return Finish(last.Text, context, usage, request.Language);
-    }
-
-    private async Task<string> RunToolAsync(ToolCall call, ToolContext context)
-    {
-        if (!_tools.TryGetValue(call.Name, out var tool))
-        {
-            return ToolJson.Error($"There is no tool called \"{call.Name}\".");
-        }
-
-        JsonElement arguments;
-        try
-        {
-            using var document =
-                JsonDocument.Parse(string.IsNullOrWhiteSpace(call.ArgumentsJson) ? "{}" : call.ArgumentsJson);
-            arguments = document.RootElement.Clone();
-        }
-        catch (JsonException)
-        {
-            return ToolJson.Error("The arguments were not valid JSON.");
-        }
-
-        try
-        {
-            return ToolJson.Serialize(await tool.RunAsync(new ToolArguments(arguments), context));
-        }
-        catch (ToolArgumentException e)
-        {
-            return ToolJson.Error(e.Message);
-        }
-        catch (NotFoundException e)
-        {
-            return ToolJson.Error(e.Message);
-        }
-        catch (ValidationFailedException e)
-        {
-            return ToolJson.Error(string.Join(" ", e.Errors.Values));
-        }
-        catch (Exception e) when (e is not OperationCanceledException)
-        {
-            logger.LogError(e, "The {Tool} tool failed.", call.Name);
-            return ToolJson.Error(
-                "The tool failed. Try different arguments, or tell the person you couldn't look it up.");
-        }
+        // Only the last assistant message is the answer; earlier ones belong to tool rounds.
+        var text = response.Messages.LastOrDefault(m => m.Role == ChatRole.Assistant)?.Text;
+        return new ChatReplyDto(Reply(text, request.Language), context.Cards.ToDto());
     }
 
     private static IEnumerable<ChatMessage> History(List<ChatTurn> turns) =>
@@ -114,24 +58,13 @@ public class ChatService(
             .Select(t =>
             {
                 var text = t.Content.Length <= MaxTurnLength ? t.Content : t.Content[..MaxTurnLength];
-                return t.Role == "user" ? ChatMessage.FromUser(text) : ChatMessage.FromAssistant(text);
+                return new ChatMessage(t.Role == "user" ? ChatRole.User : ChatRole.Assistant, text);
             });
 
-    private ChatResponse Finish(string? text, ToolContext context, List<ChatUsage> usage, string? language)
-    {
-        logger.LogInformation(
-            "Answered with {Calls} model call(s): {Prompt} prompt + {Completion} completion tokens, ${Cost}",
-            usage.Count, usage.Sum(u => u.PromptTokens), usage.Sum(u => u.CompletionTokens),
-            usage.Sum(u => u.CostUsd ?? 0));
-
-        var reply = string.IsNullOrWhiteSpace(text)
+    private static string Reply(string? text, string? language) =>
+        string.IsNullOrWhiteSpace(text)
             ? language == "bg"
                 ? "Съжалявам, не успях да съставя отговор. Можеш ли да го зададеш по друг начин?"
                 : "Sorry, I couldn't put an answer together. Could you ask that another way?"
             : text.Trim();
-
-        return new ChatResponse(reply, context.Cards.ToDto());
-    }
-
-    private static string Preview(string json) => json.Length <= 300 ? json : json[..300] + "...";
 }

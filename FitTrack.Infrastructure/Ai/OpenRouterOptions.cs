@@ -15,4 +15,6 @@ public class OpenRouterOptions
     public string AppTitle { get; set; } = "FitTrack";
 
     public string AppUrl { get; set; } = "http://localhost:5173";
+
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(ApiKey) && !string.IsNullOrWhiteSpace(Model);
 }
