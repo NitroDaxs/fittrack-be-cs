@@ -74,6 +74,7 @@ builder.Services.AddRateLimiter(options =>
             new { message = "Too many attempts. Please wait a minute and try again." }, cancellationToken));
     options.AddPolicy(RateLimits.Auth, TenPerMinutePerIp);
     options.AddPolicy(RateLimits.Uploads, TenPerMinutePerIp);
+    options.AddPolicy(RateLimits.Chat, ChatMessagesPerUser);
 });
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -124,8 +125,8 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseCors();
-app.UseRateLimiter();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -134,6 +135,11 @@ app.Run();
 static RateLimitPartition<string> TenPerMinutePerIp(HttpContext context) =>
     RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) });
+
+static RateLimitPartition<string> ChatMessagesPerUser(HttpContext context) =>
+    RateLimitPartition.GetFixedWindowLimiter(
+        context.User.FindFirst("sub")?.Value ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 10, Window = TimeSpan.FromMinutes(1) });
 
 static async Task ValidateSessionAsync(TokenValidatedContext context)

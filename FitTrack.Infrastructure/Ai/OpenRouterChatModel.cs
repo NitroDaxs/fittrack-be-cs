@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Fittrack.Application.Abstractions.Ai;
+using FitTrack.Application.Abstractions.Ai;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

@@ -1,4 +1,6 @@
+using FitTrack.Application.Abstractions.Ai;
 using FitTrack.Application.Abstractions.Email;
+using FitTrack.Infrastructure.Ai;
 using FitTrack.Infrastructure.Email;
 using FitTrack.Infrastructure.Persistence;
 using FitTrack.Infrastructure.Persistence.Repositories;
@@ -44,10 +46,17 @@ public static class DependencyInjection
         services.AddSingleton<IAvatarStorage, LocalAvatarStorage>();
 
         services.Configure<EmailOptions>(configuration.GetSection("Email"));
-        services.AddHttpClient<IAccountEmailSender, ResendEmailSender>((provider, client) =>
+        services.AddHttpClient<IAccountEmailSender, ResendEmailSender>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FitTrack/1.0");
+        });
+
+        services.Configure<OpenRouterOptions>(configuration.GetSection("OpenRouter"));
+        services.AddHttpClient<IChatModel, OpenRouterChatModel>((provider, client) =>
         {
             client.BaseAddress = new Uri(provider.GetRequiredService<IOptions<OpenRouterOptions>>().Value.BaseUrl);
-            client.Timeout = TimeSpan.FromSeconds(10);
+            client.Timeout = TimeSpan.FromSeconds(60);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("FitTrack/1.0");
         });
 

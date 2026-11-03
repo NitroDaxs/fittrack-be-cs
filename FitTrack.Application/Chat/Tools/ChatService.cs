@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
-using Fittrack.Application.Chat;
+using FitTrack.Application.Chat;
 using Microsoft.Extensions.Logging;
 
 namespace FitTrack.Application.Chat.Tools;

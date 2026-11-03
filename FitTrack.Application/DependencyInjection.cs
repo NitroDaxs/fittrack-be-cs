@@ -1,4 +1,3 @@
-using Fittrack.Application.Chat;
 using FitTrack.Application.Chat;
 using FitTrack.Application.Chat.Tools;
 using FitTrack.Application.Services;

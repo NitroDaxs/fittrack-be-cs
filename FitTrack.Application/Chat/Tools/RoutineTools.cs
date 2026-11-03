@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Fittrack.Application.Chat;
+using FitTrack.Application.Chat;
 using FitTrack.Application.Services;
 
 namespace FitTrack.Application.Chat.Tools;

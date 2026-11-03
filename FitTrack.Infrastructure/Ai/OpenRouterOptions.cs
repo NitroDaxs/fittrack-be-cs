@@ -1,4 +1,6 @@
-﻿public class OpenRouterOptions
+﻿namespace FitTrack.Infrastructure.Ai;
+
+public class OpenRouterOptions
 {
     public string ApiKey { get; set; } = "";
 

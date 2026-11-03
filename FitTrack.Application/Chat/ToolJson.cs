@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Fittrack.Application.Chat;
+using FitTrack.Application.Chat;
 
 namespace FitTrack.Application.Chat;
 

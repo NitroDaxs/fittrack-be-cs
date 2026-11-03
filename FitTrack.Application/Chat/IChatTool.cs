@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using FitTrack.Application.Chat;
 
-namespace Fittrack.Application.Chat;
+namespace FitTrack.Application.Chat;
 
 public interface IChatTool
 {

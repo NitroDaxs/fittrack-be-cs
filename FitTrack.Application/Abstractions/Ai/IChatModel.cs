@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Fittrack.Application.Abstractions.Ai;
+namespace FitTrack.Application.Abstractions.Ai;
 
 public enum ChatRole
 {
