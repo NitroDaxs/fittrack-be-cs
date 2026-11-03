@@ -4,3 +4,4 @@ global using FitTrack.Application.Abstractions.Storage;
 global using FitTrack.Application.Common;
 global using FitTrack.Application.Dtos;
 global using FitTrack.Domain.Entities;
+global using Fittrack.Application.Abstractions.Ai;
