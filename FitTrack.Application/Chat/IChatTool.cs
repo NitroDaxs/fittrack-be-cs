@@ -11,7 +11,7 @@ public interface IChatTool
 
     JsonElement Parameters { get; }
 
-    Task<object> RunAsync(ToolArguments arg, ToolContext context);
+    Task<object> RunAsync(ToolArguments args, ToolContext context);
 }
 
 public record ToolContext(int UserId, ChatCards Cards);
