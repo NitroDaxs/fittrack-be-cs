@@ -26,3 +26,5 @@ public class ValidationFailedException(IReadOnlyDictionary<string, string> error
         }
     }
 }
+
+public class ChatUnavailableException(string message) : Exception(message);

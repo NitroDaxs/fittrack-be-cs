@@ -104,14 +104,20 @@ for example `Jwt__Key`.
 | `Email:FrontendUrl` | Base URL for links in emails | `http://localhost:5173` |
 | `Storage:UploadsPath` | Folder for uploaded pictures, relative to the API project | `uploads`; `/tmp/uploads` in Production |
 | `Cors:AllowedOrigins` | Browser origins allowed to call the API | `http://localhost:5173` |
+| `OpenRouter:ApiKey` | OpenRouter API key for the chat assistant | Empty, so `POST /api/chat` answers 503 |
+| `OpenRouter:Model` | OpenRouter model id | `nvidia/nemotron-3.5-super-vl:free` |
+| `OpenRouter:BaseUrl` | OpenAI-compatible API address | `https://openrouter.ai/api/v1/` |
+| `OpenRouter:Temperature` | Sampling temperature | `0.5` |
+| `OpenRouter:MaxTokens` | Longest answer per model call, in tokens | `700` |
 
 ### Secrets
 
 `appsettings.Development.json` is tracked by Git, so never put real secrets in it.
-Keep the Resend key in .NET user secrets when developing:
+Keep the Resend and OpenRouter keys in .NET user secrets when developing:
 
 ```bash
 dotnet user-secrets set "Email:ResendApiKey" "<your-key>" --project FitTrack.Api
+dotnet user-secrets set "OpenRouter:ApiKey" "<your-key>" --project FitTrack.Api
 ```
 
 Resend's `onboarding@resend.dev` sender only delivers to the address on your own
@@ -481,3 +487,6 @@ docker run --rm -p 8080:8080 -e PORT=8080 -e Database__MigrateOnStartup=true \
 - Uploaded pictures keep their original metadata, which can include the location a
   photo was taken.
 - Progress-photo upload and social sign-in aren't implemented.
+- The chat assistant logs the tokens each answer used, but not its dollar cost.
+  It talks to OpenRouter through Microsoft.Extensions.AI's OpenAI connector, whose
+  usage details have no cost field, so check costs on OpenRouter's Activity page.

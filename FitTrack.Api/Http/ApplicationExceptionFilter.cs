@@ -14,6 +14,8 @@ public class ApplicationExceptionFilter : IExceptionFilter
             NotFoundException e => new NotFoundObjectResult(new { message = e.Message }),
             RuleViolationException e => ApiErrors.Message(e.Message),
             ValidationFailedException e => ApiErrors.Validation(ToModelState(e)),
+            ChatUnavailableException e => new ObjectResult(new { message = e.Message })
+                { StatusCode = StatusCodes.Status503ServiceUnavailable },
             _ => null,
         };
 

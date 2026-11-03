@@ -1,9 +1,11 @@
 using FitTrack.Application.Abstractions.Email;
+using FitTrack.Infrastructure.Ai;
 using FitTrack.Infrastructure.Email;
 using FitTrack.Infrastructure.Persistence;
 using FitTrack.Infrastructure.Persistence.Repositories;
 using FitTrack.Infrastructure.Security;
 using FitTrack.Infrastructure.Storage;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -48,6 +50,13 @@ public static class DependencyInjection
             client.Timeout = TimeSpan.FromSeconds(10);
             client.DefaultRequestHeaders.UserAgent.ParseAdd("FitTrack/1.0");
         });
+
+        // Without an API key no IChatClient is registered, and ChatService answers that the assistant isn't set up.
+        var openRouter = configuration.GetSection("OpenRouter").Get<OpenRouterOptions>() ?? new OpenRouterOptions();
+        if (openRouter.IsConfigured)
+        {
+            services.AddChatClient(_ => OpenRouterChatClient.Create(openRouter)).AddMiddleware(openRouter);
+        }
 
         return services;
     }
