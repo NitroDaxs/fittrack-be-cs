@@ -8,7 +8,7 @@ public class OpenRouterOptions
     
     public string BaseUrl { get; set; } = "https://openrouter.ai/api/v1/";
     
-    public double Temperature { get; set; }
+    public double Temperature { get; set; } = 0.5;
     
     public int MaxTokens { get; set; } = 700;
     

@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-using FitTrack.Application.Chat;
 using FitTrack.Application.Services;
 
 namespace FitTrack.Application.Chat.Tools;
 
-public class CalculatorTool<TRequest>(
+public abstract class CalculatorTool<TRequest>(
     string name,
     string description,
     string schema,
     Func<TRequest, object> calculate) : IChatTool
+    where TRequest : class
 {
     public string Name => name;
     public string Description => description;

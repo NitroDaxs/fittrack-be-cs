@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
-using FitTrack.Application.Chat;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
-namespace FitTrack.Application.Chat.Tools;
+namespace FitTrack.Application.Chat;
 
 public class ChatService(
     IChatModel model,

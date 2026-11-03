@@ -1,4 +1,4 @@
-﻿using FitTrack.Application.Chat.Tools;
+﻿using FitTrack.Application.Chat;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
