@@ -25,6 +25,7 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
     {
         ValidationFailedException.ThrowIfAny(
             (string.IsNullOrWhiteSpace(request.Title), "title", "The title field is required."),
+            (!HasBody(request.Body), "body", "Write the article body."),
             (request.Category is null, "category", "The category field is required."),
             (!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
 
@@ -57,7 +58,10 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
         var article = await articles.FindAsync(id)
                       ?? throw new NotFoundException("Article not found.");
 
-        ValidationFailedException.ThrowIfAny((!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
+        // Missing fields keep their value (a blank body keeps the current one), but a title that is sent must not be blank.
+        ValidationFailedException.ThrowIfAny(
+            (request.Title is not null && string.IsNullOrWhiteSpace(request.Title), "title", "The title field is required."),
+            (!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
 
         // Null keeps the current image; an empty string removes it.
         if (request.ImageUrl is not null)
@@ -104,6 +108,14 @@ public class AdminArticleService(IArticleRepository articles, IUnitOfWork unitOf
             throw new NotFoundException("Article not found.");
         }
     }
+
+    /// <summary>A body is prose with some text in it, or a non-empty list of blocks.</summary>
+    private static bool HasBody(JsonElement? body) => body switch
+    {
+        { ValueKind: JsonValueKind.String } s => !string.IsNullOrWhiteSpace(s.GetString()),
+        { ValueKind: JsonValueKind.Array } blocks => blocks.GetArrayLength() > 0,
+        _ => false,
+    };
 
     private static string ToBlocksJson(JsonElement? body, string? excerpt)
     {

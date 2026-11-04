@@ -16,8 +16,11 @@ public class AdminExerciseService(IExerciseRepository exercises, ITaxonomyReposi
     {
         ValidationFailedException.ThrowIfAny(
             (string.IsNullOrWhiteSpace(request.Name), "name", "The name field is required."),
+            (string.IsNullOrWhiteSpace(request.Description), "description", "Give it a one-line description."),
+            (request.MuscleGroups is not { Count: > 0 }, "muscle_groups", "Pick at least one muscle group."),
             (request.Difficulty is null, "difficulty", "The difficulty field is required."),
             (request.ExerciseType is null, "exercise_type", "The exercise type field is required."));
+        ThrowIfBadUrls(request);
 
         var exercise = new Exercise
         {
@@ -50,6 +53,13 @@ public class AdminExerciseService(IExerciseRepository exercises, ITaxonomyReposi
         var exercise = await exercises.FindForUpdateAsync(id)
                        ?? throw new NotFoundException("Exercise not found.");
 
+        // Missing fields keep their value, but a field that is sent must be valid.
+        ValidationFailedException.ThrowIfAny(
+            (request.Name is not null && string.IsNullOrWhiteSpace(request.Name), "name", "The name field is required."),
+            (request.Description is not null && string.IsNullOrWhiteSpace(request.Description), "description", "Give it a one-line description."),
+            (request.MuscleGroups is { Count: 0 }, "muscle_groups", "Pick at least one muscle group."));
+        ThrowIfBadUrls(request);
+
         if (request.Name is not null)
         {
             var slug = Slug.From(request.Name);
@@ -74,6 +84,11 @@ public class AdminExerciseService(IExerciseRepository exercises, ITaxonomyReposi
 
         return (await exercises.GetWithDetailsAsync(id)).ToDto();
     }
+
+    private static void ThrowIfBadUrls(ExerciseRequest request) =>
+        ValidationFailedException.ThrowIfAny(
+            (!ImageUrls.IsValid(request.VideoUrl), "video_url", "The video URL must be a valid http or https address."),
+            (!ImageUrls.IsValid(request.ThumbnailUrl), "thumbnail_url", "The thumbnail URL must be a valid http or https address."));
 
     public async Task DeleteAsync(int id)
     {

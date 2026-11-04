@@ -49,6 +49,11 @@ public class ProfileService(
         var user = await users.GetForUpdateAsync(userId);
         RequireCurrentPassword(user, request.CurrentPassword);
 
+        if (request.NewPassword == request.CurrentPassword)
+        {
+            throw new ValidationFailedException("new_password", "Choose a password different from your current one.");
+        }
+
         user.PasswordHash = hasher.Hash(request.NewPassword);
         await resetTokens.DeleteForUserAsync(user.Id);
         await unitOfWork.SaveChangesAsync();

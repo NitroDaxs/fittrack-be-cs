@@ -25,6 +25,7 @@ public class AdminRoutineService(IRoutineRepository routines, IExerciseRepositor
     {
         ValidationFailedException.ThrowIfAny(
             (string.IsNullOrWhiteSpace(request.Title), "title", "The title field is required."),
+            (string.IsNullOrWhiteSpace(request.Description), "description", "Describe the programme in a sentence."),
             (request.Goal is null, "goal", "The goal field is required."),
             (request.Level is null, "level", "The level field is required."),
             (request.DaysPerWeek is null, "days_per_week", "The days per week field is required."),
@@ -64,7 +65,11 @@ public class AdminRoutineService(IRoutineRepository routines, IExerciseRepositor
         var routine = await routines.FindForUpdateAsync(id)
                       ?? throw new NotFoundException("Routine not found.");
 
-        ValidationFailedException.ThrowIfAny((!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
+        // Missing fields keep their value, but a field that is sent must be valid.
+        ValidationFailedException.ThrowIfAny(
+            (request.Title is not null && string.IsNullOrWhiteSpace(request.Title), "title", "The title field is required."),
+            (request.Description is not null && string.IsNullOrWhiteSpace(request.Description), "description", "Describe the programme in a sentence."),
+            (!ImageUrls.IsValid(request.ImageUrl), "image_url", ImageUrls.InvalidMessage));
 
         // Null keeps the current image; an empty string removes it.
         if (request.ImageUrl is not null)
