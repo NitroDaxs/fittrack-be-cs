@@ -47,13 +47,14 @@ public record LoggedSet
 
 public record CustomMeasurementsDto
 {
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Waist { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Chest { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Arms { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Shoulders { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Hips { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Thighs { get; init; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public decimal? Calves { get; init; }
+    // Inches. Blank is fine; a value must be positive.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Waist { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Chest { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Arms { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Shoulders { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Hips { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Thighs { get; init; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull), Range(0.1, 500)] public decimal? Calves { get; init; }
 }
 
 public record BodyMeasurementDto(
@@ -68,8 +69,13 @@ public record BodyMeasurementDto(
 public record LogMeasurementRequest
 {
     public DateOnly? Date { get; init; }
-    [Range(0, 999)] public decimal? Weight { get; init; }
-    [Range(0, 100)] public decimal? BodyFatPct { get; init; }
+    // Stored in lbs; the frontend converts kg before sending.
+    [Required(ErrorMessage = "Weight is required.")]
+    [Range(0.1, 999, ErrorMessage = "Enter a weight between 0.1 and 999 lbs.")]
+    public decimal? Weight { get; init; }
+
+    [Range(0, 70, ErrorMessage = "Body fat should be between 0 and 70%.")]
+    public decimal? BodyFatPct { get; init; }
     public CustomMeasurementsDto? CustomMeasurements { get; init; }
     public string? PhotoUrl { get; init; }
 }

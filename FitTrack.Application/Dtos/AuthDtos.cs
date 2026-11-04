@@ -17,11 +17,15 @@ public record AuthResponse(
     string AccessToken,
     string TokenType = "Bearer");
 
+// Field rules mirror the frontend's form schemas (src/schemas in fittrack-frontend).
+
 public record RegisterRequest
 {
     [Required, MaxLength(255)] public string Name { get; init; } = "";
     [Required, EmailAddress, MaxLength(255)] public string Email { get; init; } = "";
-    [Required, MinLength(8)] public string Password { get; init; } = "";
+
+    [Required, RegularExpression(PasswordRules.Pattern, ErrorMessage = PasswordRules.Message)]
+    public string Password { get; init; } = "";
 }
 
 public record ForgotPasswordRequest
@@ -32,7 +36,10 @@ public record ForgotPasswordRequest
 public record ResetPasswordRequest
 {
     [Required] public string Token { get; init; } = "";
-    [Required, MinLength(8)] public string Password { get; init; } = "";
+
+    [Required, RegularExpression(PasswordRules.Pattern, ErrorMessage = PasswordRules.Message)]
+    public string Password { get; init; } = "";
+
     [Required, Compare(nameof(Password))] public string PasswordConfirmation { get; init; } = "";
 }
 
@@ -45,7 +52,7 @@ public record LoginRequest
 public record UpdateProfileRequest
 {
     [MaxLength(255)] public string? Name { get; init; }
-    [EmailAddress] public string? Email { get; init; }
+    [EmailAddress, MaxLength(255)] public string? Email { get; init; }
     public Units? Units { get; init; }
 
     /// <summary>Required when changing the email.</summary>
@@ -58,7 +65,7 @@ public record ChangePasswordRequest
     public string CurrentPassword { get; init; } = "";
 
     [Required(ErrorMessage = "Choose a new password.")]
-    [RegularExpression(@"^(?=.*\d).{8,}$", ErrorMessage = "Use at least 8 characters, including a number.")]
+    [RegularExpression(PasswordRules.Pattern, ErrorMessage = PasswordRules.Message)]
     public string NewPassword { get; init; } = "";
 
     [Required(ErrorMessage = "Confirm your new password.")]

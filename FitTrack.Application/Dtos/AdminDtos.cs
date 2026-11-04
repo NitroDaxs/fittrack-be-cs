@@ -11,8 +11,9 @@ public record ExerciseRequest
     public string? Instructions { get; init; }
     public Difficulty? Difficulty { get; init; }
     public ExerciseCategory? ExerciseType { get; init; }
-    [Url] public string? VideoUrl { get; init; }
-    [Url] public string? ThumbnailUrl { get; init; }
+    // Checked as http(s) addresses by the service, like image URLs.
+    [MaxLength(2048)] public string? VideoUrl { get; init; }
+    [MaxLength(2048)] public string? ThumbnailUrl { get; init; }
     public bool? IsPublished { get; init; }
     public List<string>? MuscleGroups { get; init; }   // slugs or names
     public List<string>? PrimaryMuscles { get; init; }
@@ -34,6 +35,9 @@ public record RoutineRequest
 public record RoutineDayRequest
 {
     [Required, MaxLength(255)] public string Name { get; init; } = "";
+
+    // An empty day would publish as an empty block on the routine page.
+    [MinLength(1, ErrorMessage = "Every day needs at least one exercise.")]
     public List<RoutineDayExerciseRequest> Exercises { get; init; } = [];
 }
 
@@ -60,8 +64,10 @@ public record ArticleRequest
 public record AdminUserRequest
 {
     [MaxLength(255)] public string? Name { get; init; }
-    [EmailAddress] public string? Email { get; init; }
-    [MinLength(8)] public string? Password { get; init; }
+    [EmailAddress, MaxLength(255)] public string? Email { get; init; }
+
+    [RegularExpression(PasswordRules.Pattern, ErrorMessage = PasswordRules.Message)]
+    public string? Password { get; init; }
     public UserRole? Role { get; init; }
     public bool? IsActive { get; init; }
 }

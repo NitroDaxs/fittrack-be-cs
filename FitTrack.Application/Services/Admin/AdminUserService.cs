@@ -55,6 +55,11 @@ public class AdminUserService(
         var user = await users.FindAsync(id)
                    ?? throw new NotFoundException("User not found.");
 
+        // Missing fields keep their value, but a field that is sent must be valid.
+        ValidationFailedException.ThrowIfAny(
+            (request.Name is not null && string.IsNullOrWhiteSpace(request.Name), "name", "The name field is required."),
+            (request.Email is not null && string.IsNullOrWhiteSpace(request.Email), "email", "The email field is required."));
+
         if (user.Id == actingUserId && request.Role == UserRole.Member)
         {
             throw new RuleViolationException("You cannot remove your own admin role.");

@@ -113,6 +113,18 @@ public class ProfileServiceTests
         Assert.Empty(_resetTokens.Items);
     }
 
+    [Fact]
+    public async Task The_new_password_must_differ_from_the_current_one()
+    {
+        var oldHash = _user.PasswordHash;
+
+        var error = await Assert.ThrowsAsync<ValidationFailedException>(() => _service.ChangePasswordAsync(
+            1, new ChangePasswordRequest { CurrentPassword = Password, NewPassword = Password, NewPasswordConfirmation = Password }));
+
+        AssertField(error, "new_password");
+        Assert.Equal(oldHash, _user.PasswordHash);
+    }
+
     private class FakeTokenIssuer : ITokenService
     {
         public string CreateToken(User user) => SessionService.StampFor(user);
